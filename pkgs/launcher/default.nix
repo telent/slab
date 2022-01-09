@@ -32,10 +32,10 @@ let configs = stdenv.mkDerivation {
         ''
          confdir=$out/etc/xdg/
          mkdir -p $confdir
-         cp -r home/config/sway $confdir/
-         cp -r home/config/waybar $confdir/
+         cp -r config/sway $confdir/
+         cp -r config/waybar $confdir/
          mkdir $out/bin
-         cp  usr/local/bin/* $out/bin
+         cp  bin/* $out/bin
        '';
     };
     paths = lib.concatStringsSep ":"
