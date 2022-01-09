@@ -1,0 +1,6 @@
+#!/bin/bash
+
+swayphone_power_presleep
+
+systemctl suspend
+

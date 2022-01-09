@@ -1,0 +1,21 @@
+#!/bin/bash
+
+BACKLIGHT=~/.backlight
+
+usleep 250000 # term stabilization 
+
+DEFAULT=$(((`pptk-backlight get_percent`+5)/10*10))
+
+dialog --scrollbar --default-item $DEFAULT --menu Backlight 0 0 10 \
+	100 FULL \
+	90  :::: \
+	80  :::. \
+	70  ::: \
+	60  ::. \
+	50  :: \
+	40  :. \
+	30  : \
+	20  . \
+	10  MIN \
+	2>$BACKLIGHT && pptk-backlight set_percent `cat $BACKLIGHT`
+

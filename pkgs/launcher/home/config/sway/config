@@ -1,0 +1,288 @@
+# Read `man 5 sway` for a complete reference.
+
+### Variables
+#
+# Mod4 = Logo key. Mod1 = Alt.
+# Using Mod1 for now since nothing better is available on the virtual keyboard.
+set $mod Mod1
+
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+
+# Your preferred terminal emulator
+set $term termite
+
+# Your preferred application launcher
+# Note: pass the final command to swaymsg so that the resulting window can be opened
+# on the original workspace that the command was run on.
+set $menu bemenu-run -n -p RUN | xargs swaymsg exec --
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg /nix/store/n59ak0287jv7qv68a39pvv4abs2hyxa4-sway-1.6.1/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+#
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Idle configuration
+#
+# Example configuration:
+#
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * dpms off"' \
+#               resume 'swaymsg "output * dpms on"' \
+#          before-sleep 'swaylock -f -c 000000'
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+### Input configuration
+#
+# Example configuration:
+#
+#   input "2:14:SynPS/2_Synaptics_TouchPad" {
+#       dwt enabled
+#       tap enabled
+#       natural_scroll enabled
+#       middle_emulation enabled
+#   }
+#
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Read `man 5 sway-input` for more information about this section.
+
+### Key bindings
+#
+# Basics:
+#
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+q kill
+
+    # Start your launcher
+    bindsym $mod+d exec $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+    # Reload the configuration file
+    bindsym $mod+Ctrl+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+#
+# Moving around:
+#
+    # Move your focus around
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    bindsym $mod+Shift+$left move left
+    bindsym $mod+Shift+$down move down
+    bindsym $mod+Shift+$up move up
+    bindsym $mod+Shift+$right move right
+    # Ditto, with arrow keys
+    bindsym $mod+Shift+Left move left
+    bindsym $mod+Shift+Down move down
+    bindsym $mod+Shift+Up move up
+    bindsym $mod+Shift+Right move right
+#
+# Workspaces:
+#
+    set $W1 '1'
+    set $W2 '2'
+    set $W3 '3:F'
+    set $W4 '4:4'
+    set $W5 '5:P'
+    set $W6 '6:6'
+    set $W7 '7:7'
+    set $W8 '8:M'
+    set $W9 '9:K'
+
+    for_window [app_id="firefox"] move workspace $W3; workspace $W3; border none
+    for_window [app_id="keepassxc"] move workspace $W9; workspace $W9; border none
+
+    # Switch to workspace
+    bindsym $mod+1 workspace $W1
+    bindsym $mod+2 workspace $W2
+    bindsym $mod+3 workspace $W3
+    bindsym $mod+4 workspace $W4
+    bindsym $mod+5 workspace $W5
+    bindsym $mod+6 workspace $W6
+    bindsym $mod+7 workspace $W7
+    bindsym $mod+8 workspace $W8
+    bindsym $mod+9 workspace $W9
+    bindsym $mod+0 workspace $W10
+    # Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace $W1
+    bindsym $mod+Shift+2 move container to workspace $W2
+    bindsym $mod+Shift+3 move container to workspace $W3
+    bindsym $mod+Shift+4 move container to workspace $W4
+    bindsym $mod+Shift+5 move container to workspace $W5
+    bindsym $mod+Shift+6 move container to workspace $W6
+    bindsym $mod+Shift+7 move container to workspace $W7
+    bindsym $mod+Shift+8 move container to workspace $W8
+    bindsym $mod+Shift+9 move container to workspace $W9
+    bindsym $mod+Shift+0 move container to workspace $W10
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    bindsym $mod+b splith
+    bindsym $mod+v splitv
+
+    # Switch the current container between different layout styles
+    bindsym $mod+s layout stacking
+    bindsym $mod+w layout tabbed
+    bindsym $mod+e layout toggle split
+
+    # Make the current focus fullscreen
+    bindsym $mod+f fullscreen
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+Shift+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    bindsym $mod+space focus mode_toggle
+
+    # Move focus to the parent container
+    bindsym $mod+a focus parent
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    bindsym $mod+minus scratchpad show
+
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+#
+# Power Button
+#
+set $pplock   'swayphone_power_sleep'
+set $ppunlock 'swayphone_power_wakeup'
+set $lockapp swaylock
+set $lock   '$lockapp -f -c 555555'
+set $unlock 'killall $lockapp'
+## wish this worked...
+#bindsym XF86PowerOff exec $lock
+#bindsym --locked XF86PowerOff exec $unlock
+# alternative:
+bindcode 124 exec '$lock ; swayphone_power_presleep'
+bindcode --locked 124 exec '$unlock ; swayphone_power_wakeup'
+
+exec swayidle -w \
+          timeout 30 'pptk-backlight set_percent 10' \
+	       resume 'swayphone_power_wakeup' \
+          timeout 600 'swayphone_power_rest' \
+               resume 'swayphone_power_wakeup' \
+          timeout 1200 'swayphone_power_sleep' \
+          before-sleep 'swayphone_power_presleep' \
+          after-resume 'killall swaylock; swayphone_power_wakeup' \
+	  unlock 'killall swaylock'
+
+# Scale the touchscreen LCD UI
+output DSI-1 scale 2
+
+# Bind input and output for correct rotation support
+input 1046:4097:Goodix_Capacitive_TouchScreen map_to_output DSI-1
+#output DSI-1 transform 90
+output DSI-1 transform 0
+
+# Display rotation daemon
+exec 'rot8 --display DSI-1 --threshold 0.97 --x-file /sys/bus/iio/devices/iio:device2/in_accel_y_raw --y-file /sys/bus/iio/devices/iio:device2/in_accel_x_raw --y-invert --on-change swayphone_rotated'
+
+# Keyboard
+exec 'squeekboard > ~/.squeek-log 2>&1'
+
+# Gesture detection
+# exec lisgd -d /dev/input/event3  \
+#  -g "1,l,r, false" \
+#  -g "1,r,l, false" \
+#  -g "1,u,d, false" \
+#  -g "1,d,u, false" \
+#  -g "2,l,r, swaymsg workspace prev" \
+#  -g "2,r,l, swaymsg workspace next" \
+#  -g "2,u,d, swaymsg exec swayphone_keyboard_hide" \
+#  -g "2,d,u, swaymsg exec swayphone_keyboard_show" \
+#  -g "2,l,u, swaymsg fullscreen" \
+#  -g "2,r,d, swaymsg kill" \
+#  -g "3,l,r, swaymsg focus right" \
+#  -g "3,r,l, swaymsg focus left" \
+#  -g "3,u,d, swaymsg focus down" \
+#  -g "3,d,u, swaymsg focus up" \
+#  -g "4,l,r, swaymsg move right" \
+#  -g "4,r,l, swaymsg move left" \
+#  -g "4,u,d, swaymsg move down" \
+#  -g "4,d,u, swaymsg move up"
+
+exec lisgd -d /dev/input/event3  \
+  -g "2,DU,*,*,R,swaymsg exec swayphone_keyboard_show" \
+  -g "2,UD,*,*,R,swaymsg exec swayphone_keyboard_hide"
+
+# Status Bar
+# side
+exec "rm /tmp/sway_rotation"
+# exec "waybar -c ~/.nix-profile/etc/xdg/waybar/config_v -b side"
+# exec "sleep 2 ; kill -10 `pgrep -f 'waybar.*-b side'`"
+
+exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_0 -b top"
+exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_1 -b bottom"
+
+# Restore backlight
+exec 'swayphone_power_wakeup 2> /home/dan/wakeup.log'

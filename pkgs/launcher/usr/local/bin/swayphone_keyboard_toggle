@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+pidof squeekboard || squeekboard &
+state=$(busctl get-property --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 Visible)
+case $state in
+    "b true")
+	echo "pop down"
+	busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
+	;;
+    *)
+	echo "pop up"
+	busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
+	;;
+esac

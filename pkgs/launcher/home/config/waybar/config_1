@@ -1,0 +1,69 @@
+
+{
+    //GLOBAL
+
+    "layer": "top",
+
+    "position": "bottom",
+
+    "modules-left": [
+        "network"
+    ],
+
+    "modules-center": [
+        "custom/apps"
+    ],
+
+    "modules-right": [
+//    	"tray",
+//    	"backlight",
+//	"pulseaudio"
+	"custom/keyboard"
+    ],
+
+//MODULES
+
+    "custom/apps": {
+	"format": "ᐃ",
+	"on-click": "termite -e swayphone_menuselect"
+    },
+
+    "custom/keyboard": {
+	"format": "⌨",
+	"on-click": "swayphone_keyboard_toggle"
+    },
+
+    "network": {
+        "interval": 5,
+        "format-wifi": "  {essid}", // Icon: wifi
+        "format-ethernet": "  {ifname}", // Icon: ethernet
+        "format-disconnected": "Disconnected",
+        "tooltip-format": "{ifname}: {ipaddr}",
+	"on-click": "swaymsg exec \"termite -e nmtui\""
+    },
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">  {}</span>",
+        "tooltip": true
+    },
+
+
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{icon} {percent}% ",
+        "states": [0,50],
+        "format-icons": ["", ""],
+	"on-click": "termite -e swayphone_backlightselect"
+    },
+    "tray": {
+        "icon-size": 22
+
+        //"spacing": 10
+    },
+
+
+    "custom/bar": {
+        "format": "",
+        "tooltip": false
+    }
+}
