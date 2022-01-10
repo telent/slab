@@ -15,7 +15,6 @@ Right now it might be responsive but it's not very usable
 
 * keyboard
  - doesn't open on demand, must be toggled manually
- - missing icon for backspace key
  - arrow keys are half-size
  - ctrl key is sticky
 

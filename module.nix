@@ -21,6 +21,7 @@ in {
       squeekboardService
       firefoxMobile
       launcher
+      gnome3.adwaita-icon-theme
     ];
 
     services.dbus.packages = [ pkgs.squeekboardService ];
