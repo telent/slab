@@ -36,14 +36,27 @@ in {
 
     systemd.services.sway = {
       enable = true;
-      wants = [ "systemd-machined.service" ];
+
+      # these dependencies are copied from  display-manager.service
+      # on a GNOME machine, may or may not be entirely correct
+      wants = [
+        "systemd-machined.service"
+        "accounts-daemon.service"
+        "systemd-udev-settle.service"
+      ];
       after =  [
         "rc-local.service"
         "systemd-machined.service"
         "systemd-user-sessions.service"
+        "getty@tty${cfg.ttyNumber}.service"
         "plymouth-quit.service"
         "plymouth-start.service"
         "systemd-logind.service"
+        "systemd-udev-settle.service"
+      ];
+      conflicts = [
+        "getty@tty${cfg.ttyNumber}.service"
+        "plymouth-quit.service"
       ];
 
       serviceConfig =
@@ -67,6 +80,7 @@ in {
           StandardError = "journal";
           StandardOutput = "journal";
           Restart = "no";
+          SyslogIdentifier = "sway";
         };
     };
 
