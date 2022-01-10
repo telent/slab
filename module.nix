@@ -1,6 +1,18 @@
 { config, lib, pkgs, ... }:
 
-{
+let
+  cfg = config.services.slab;
+in {
+  options.services.slab = {
+    ttyNumber = lib.mkOption {
+      type = lib.types.str;
+      default = "2";
+    };
+    userName =  lib.mkOption {
+      type = lib.types.str;
+      default = "dan";
+    };
+  };
   config = {
     nixpkgs.overlays = [ (import ./overlay.nix) ] ;
 
@@ -44,6 +56,7 @@
         "plymouth-start.service"
         "systemd-logind.service"
       ];
+
       serviceConfig =
         let run-sway = pkgs.writeScript "run-sway" ''
           #!${pkgs.bash}/bin/bash
@@ -54,13 +67,13 @@
         in {
 #          ExecStartPre = "${config.system.path}/bin/chvt 6";
           ExecStart = run-sway;
-          TTYPath = "/dev/tty2";
+          TTYPath = "/dev/tty${cfg.ttyNumber}";
           TTYReset = "yes";
           TTYVHangup = "yes";
           TTYVTDisallocate = "yes";
           PAMName = "login";
-          User = "dan";
-          WorkingDirectory = "/home/dan";
+          User = cfg.userName;
+          WorkingDirectory = "/home/${cfg.userName}";
           StandardInput = "tty";
           StandardError = "journal";
           StandardOutput = "journal";
@@ -92,5 +105,4 @@
       };
     };
   };
-
 }
