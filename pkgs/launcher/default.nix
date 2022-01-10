@@ -17,13 +17,7 @@
 , writeScriptBin
 } :
 let configs = stdenv.mkDerivation {
-      src = fetchFromGitHub {
-        repo  = "pinephone-sway-poc";
-        owner = "Dejvino";
-        rev = "eff323bf72a4d9787bddd611f27a360071af31ed";
-        hash = lib.fakeHash;
-      };
-      patches = ./local.patch;
+      src = ./.;
       pname = "launcher";
       version = "1";
 
@@ -32,8 +26,8 @@ let configs = stdenv.mkDerivation {
         ''
          confdir=$out/etc/xdg/
          mkdir -p $confdir
-         cp -r config/sway $confdir/
-         cp -r config/waybar $confdir/
+         cp -r sway $confdir/
+         cp -r waybar $confdir/
          mkdir $out/bin
          cp  bin/* $out/bin
        '';
