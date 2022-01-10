@@ -16,17 +16,6 @@ in {
   config = {
     nixpkgs.overlays = [ (import ./overlay.nix) ] ;
 
-    # think this is unneeded
-
-    # services.xserver.desktopManager.session = [ {
-    #   name = "sway";
-    #   start = ''
-    #       date >> /tmp/sesslog
-    #       ${pkgs.sway}/bin/sway 2>&1 >> /tmp/sesslog
-    #       echo Finished /tmp/sesslog
-    #       '';
-    # } ];
-
     environment.systemPackages = with pkgs; [
       chatty
       squeekboardService
