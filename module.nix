@@ -70,6 +70,27 @@
 
     # waybar needs one or more of these for icons
     fonts.fonts = with pkgs; [ font-awesome font-awesome-ttf ] ;
+
+    # XXX need to tighten these down, all we really need is to
+    # be able to write some sysfs files
+    security.wrappers = {
+      pptk-backlight = {
+        setuid = true; owner = "root"; group = "root";
+        source = "${pkgs.pinephone-toolkit}/bin/pptk-backlight";
+      };
+      pptk-cpu-sleep =  {
+        setuid = true; owner = "root"; group = "root";
+        source = "${pkgs.pinephone-toolkit}/bin/pptk-cpu-sleep";
+      };
+      pptk-led =  {
+        setuid = true; owner = "root"; group = "root";
+        source = "${pkgs.pinephone-toolkit}/bin/pptk-led";
+      };
+      pptk-vibrate =  {
+        setuid = true; owner = "root"; group = "root";
+        source = "${pkgs.pinephone-toolkit}/bin/pptk-vibrate";
+      };
+    };
   };
 
 }

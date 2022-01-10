@@ -40,7 +40,7 @@ let configs = stdenv.mkDerivation {
          dialog lisgd
          waybar]);
 in writeScriptBin "launch" ''
-  PATH=${paths}:${configs}/bin:$PATH
+  PATH=/run/wrappers/bin:${paths}:${configs}/bin:$PATH
   MOZ_ENABLE_WAYLAND=1
   WAYBAR_CONFIG=${configs}/etc/xdg/waybar
   export MOZ_ENABLE_WAYLAND WAYBAR_CONFIG
