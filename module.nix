@@ -37,13 +37,16 @@ in {
     systemd.services.sway = {
       enable = true;
 
-      # these dependencies are copied from  display-manager.service
-      # on a GNOME machine, may or may not be entirely correct
+      # these dependencies are copied from display-manager.service on
+      # a GNOME machine. They work for me, but may or may not be
+      # entirely optimal
       wants = [
         "systemd-machined.service"
         "accounts-daemon.service"
         "systemd-udev-settle.service"
+        "dbus.socket"
       ];
+      aliases = [ "display-manager.service" ];
       after =  [
         "rc-local.service"
         "systemd-machined.service"
