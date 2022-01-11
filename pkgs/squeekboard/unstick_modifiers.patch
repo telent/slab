@@ -1,0 +1,13 @@
+diff --git a/src/submission.rs b/src/submission.rs
+index 39da68f..4c11e70 100644
+--- a/src/submission.rs
++++ b/src/submission.rs
+@@ -183,7 +183,7 @@ impl Submission {
+                 SubmittedAction::VirtualKeyboard(keycodes.clone())
+             },
+         };
+-        
++        self.modifiers_active.truncate(0);
+         self.pressed.push((key_id, submit_action));
+     }
+ 

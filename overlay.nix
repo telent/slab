@@ -11,6 +11,9 @@ self: super: {
       EOF
     '';
   };
+
+  squeekboard = self.callPackage ./pkgs/squeekboard {};
+
   firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
 
   launcher = self.callPackage ./pkgs/launcher {};
