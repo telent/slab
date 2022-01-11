@@ -1,0 +1,27 @@
+#!/bin/bash
+
+BACKLIGHT_FILE=~/.backlight
+BACKLIGHT_MIN=10
+
+snooze(){
+    pptk-led set red 1
+    pptk-led set green 1
+    pptk-led set blue 0
+    pptk-cpu-sleep enable
+}
+
+wakeup(){
+    pptk-led set red 0
+    pptk-led set green 0
+    pptk-led set blue 1
+    pptk-cpu-sleep disable
+    BACKLIGHT=$((`cat $BACKLIGHT_FILE` >= $BACKLIGHT_MIN ? `cat $BACKLIGHT_FILE` : $BACKLIGHT_MIN))
+    pptk-backlight set_percent $BACKLIGHT
+}
+
+online=$(cat  /sys/devices/system/cpu/cpu*/online | awk '{tot+=$1} END {print tot}')
+if [ "$online" -gt "3" ] ; then
+    snooze
+else
+    wakeup
+fi

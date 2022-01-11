@@ -223,15 +223,14 @@ set $unlock 'killall $lockapp'
 #bindsym XF86PowerOff exec $lock
 #bindsym --locked XF86PowerOff exec $unlock
 # alternative:
-bindcode 124 exec '$lock ; swayphone_power_presleep'
-bindcode --locked 124 exec '$unlock ; swayphone_power_wakeup'
+bindcode 124 exec 'swayphone_power_toggle'
 
 exec swayidle -w \
           timeout 30 'pptk-backlight set_percent 10' \
 	       resume 'swayphone_power_wakeup' \
-          timeout 600 'swayphone_power_rest' \
+          timeout 60 'swayphone_power_rest' \
                resume 'swayphone_power_wakeup' \
-          timeout 1200 'swayphone_power_sleep' \
+          timeout 120 'swayphone_power_sleep' \
           before-sleep 'swayphone_power_presleep' \
           after-resume 'killall swaylock; swayphone_power_wakeup' \
 	  unlock 'killall swaylock'
