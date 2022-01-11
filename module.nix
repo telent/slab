@@ -33,6 +33,31 @@ in {
         mako grim slurp wl-clipboard wf-recorder
       ];
     };
+
+    # this is seven kinds of convoluted, I can only assume because
+    # GNOME developers like to cosplay as enterprise admin software
+    # developers
+    programs.dconf =
+      let profile = pkgs.writeText "user" ''
+         user-db:user
+         system-db:slab
+         ''; in
+        {
+          enable = true;
+          profiles.user = ( builtins.toPath profile);
+          packages =
+            let squeekboardSetting = pkgs.stdenv.mkDerivation {
+                  name="squeekboard-conf";
+                  phases = ["installPhase"];
+                  installPhase = ''
+                    d=$out/etc/dconf/db/slab.d
+                    mkdir -p $d
+                    echo -e "[org/gnome/desktop/a11y/applications]\nscreen-keyboard-enabled=true" > $d/file
+                ''    ;
+                };
+            in [ squeekboardSetting ];
+        };
+
     systemd.defaultUnit = "graphical.target";
 
     systemd.services.sway = {

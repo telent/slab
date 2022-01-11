@@ -26,16 +26,14 @@ Right now - it might be responsive, but it's not very usable
 * swaylock doesn't open onscreen keyboard, so no unlock possible
 
 * keyboard
-  - doesn't open on demand, must be toggled manually
   - arrow keys are half-size
-  - ctrl key is sticky
+  - ctrl key is sticky (https://github.com/valderman/squeekboard-sway/commit/0ae1313659d4d7569169c75c5363a18580497e17 is a clue)
+  - layout files must be hand-copied into ~/.local/share/
 
 * add pane-aware gestures so apps can be dismissed/hidden by dragging
 them offscreen. This could be a chunk of work: libinput doesn't and
 won't support touchscreen gestures, lisgd sees the same events as the
 compositor (doesn't consume them when it recognises a gesture)
-
-client
 
 * switch termite for something still maintained (alacritty?)
 
