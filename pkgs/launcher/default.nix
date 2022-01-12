@@ -46,6 +46,6 @@ in writeScriptBin "launch" ''
   WAYBAR_CONFIG=${configs}/etc/xdg/waybar
   export MOZ_ENABLE_WAYLAND WAYBAR_CONFIG
   echo `date` started > $HOME/.sway-log
-  ${sway}/bin/sway -c ${configs}/etc/xdg/sway/config -d >> $HOME/.sway-log 2>&1
+  ${sway}/bin/sway -c ${configs}/etc/xdg/sway/config  >> $HOME/.sway-log 2>&1
   echo `date` finished $? >> $HOME/.sway-log
 ''
