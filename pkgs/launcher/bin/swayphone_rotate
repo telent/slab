@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# from https://gist.githubusercontent.com/samueldr/0cea0f2f0422a20c410d519b6d5d5b9a/raw/0eeff76aeae7cc1398d78168e11173c4f6dd3d31/iio-autorotate.nix
+
+set -e
+set -u
+
+rotate(){
+    swaymsg output DSI-1 transform $1
+}
+
+while read -r line
+do
+    case $line in
+	"Accelerometer orientation changed:"*)
+	    side="${line##* }"
+	    case $side in
+		normal)
+		    echo normal
+		    rotate normal
+		    ;;
+		bottom-up)
+		    rotate 180
+		    ;;
+		left-up)
+		    rotate 270
+		    ;;
+		right-up)
+		    rotate 90
+		    ;;
+	    esac
+	    ;;
+
+    esac
+done < <( monitor-sensor )

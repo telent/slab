@@ -238,13 +238,9 @@ exec swayidle -w \
 # Scale the touchscreen LCD UI
 output DSI-1 scale 2
 
-# Bind input and output for correct rotation support
 input 1046:4097:Goodix_Capacitive_TouchScreen map_to_output DSI-1
-#output DSI-1 transform 90
-output DSI-1 transform 0
 
-# Display rotation daemon
-exec 'rot8 --display DSI-1 --threshold 0.97 --x-file /sys/bus/iio/devices/iio:device2/in_accel_y_raw --y-file /sys/bus/iio/devices/iio:device2/in_accel_x_raw --y-invert --on-change swayphone_rotated'
+exec swayphone_rotate
 
 # Keyboard
 exec 'squeekboard > ~/.squeek-log 2>&1'
@@ -276,7 +272,7 @@ exec lisgd -d /dev/input/event3  \
 
 # Status Bar
 # side
-exec "rm /tmp/sway_rotation"
+
 # exec "waybar -c ~/.nix-profile/etc/xdg/waybar/config_v -b side"
 # exec "sleep 2 ; kill -10 `pgrep -f 'waybar.*-b side'`"
 

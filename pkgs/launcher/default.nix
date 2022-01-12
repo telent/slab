@@ -2,11 +2,11 @@
 , bemenu
 , dialog
 , fetchFromGitHub
+, iio-sensor-proxy
 , lib
 , lisgd
 , mako
 , pinephone-toolkit
-, rot8
 , rustPlatform
 , squeekboard
 , sway
@@ -30,12 +30,13 @@ let configs = stdenv.mkDerivation {
          cp -r waybar $confdir/
          mkdir $out/bin
          cp  bin/* $out/bin
+         substituteInPlace $out/bin/swayphone_rotate --replace monitor-sensor ${iio-sensor-proxy}/bin/monitor-sensor
        '';
+
     };
     paths = lib.concatStringsSep ":"
       (builtins.map (f: "${f}/bin")
         [lisgd swayidle swaylock bemenu squeekboard mako
-         rot8
          pinephone-toolkit
          dialog lisgd
          waybar]);
