@@ -23,7 +23,8 @@ Right now - it might be responsive, but it's not very usable
 
 "everything"
 
-* swaylock doesn't open onscreen keyboard, so no unlock possible
+* need a key/pin lock of some kind (swaylock doesn't open onscreen
+  keyboard so can't use it)
 
 * keyboard
   - arrow keys are half-size
@@ -38,17 +39,37 @@ compositor (doesn't consume them when it recognises a gesture)
 * switch termite for something still maintained (alacritty?)
 
 * don't let sway suspend the device without warning when ssh sessions active
+   sudo -b systemd-inhibit --mode=block --why="SSH session" sleep 300
 
-* improve networkmanager ui to work with touch input
+* improve networkmanager ui to work with touch input (nmtui not quite it)
+
+* periodic wake from sleep to check for network activity (emails or
+chat client messages or whatever).
+
+   timerfd_create(CLOCK_BOOTTIME_ALARM) apparently does this: write a
+   program that calls it in a loop then prods networkmanager to
+   establish a connection. Anything running that wants to poll a
+   server when the network is up can register with networkmanager (I
+   assume) to find out when that's the case, and we should save
+   the battery hit of having 16 apps spin up the radio on 16 different
+   five minute intervals
 
 * missings apps
-  - dialler
-  - messaging (SMS etc)
+  - dialler (WIP see pkgs/beehive)
+  - messaging (SMS etc) (chatty will do)
   - waydroid?
   - totp
 
+* touch-aware app laucher?
+
+   all apps: for i in ${XDG_DATA_DIRS//:/ /} ; do ls $i/applications/*.desktop ;done
+
+
+
 * (hardware/pinephone) find out why it doesn't charge on usb2
+
+* brightness setting
 
 * firefox
   - automate layers.acceleration.force setting
-
+  - find something faster? luakit? netsurf?
