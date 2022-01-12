@@ -37,8 +37,6 @@ compositor (doesn't consume them when it recognises a gesture)
 
 * switch termite for something still maintained (alacritty?)
 
-* disable power button (seems to reboot sometimes not others)
-
 * don't let sway suspend the device without warning when ssh sessions active
 
 * improve networkmanager ui to work with touch input
