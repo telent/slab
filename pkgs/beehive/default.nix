@@ -21,6 +21,7 @@ let fennel = fetchurl {
     lua = lua5_3.withPackages (ps: with ps; [
       lgi
       (dbusProxy.overrideAttrs(o: {pname = "dbus-prixy";}))
+      luasql-sqlite3
       readline ]);
 in stdenv.mkDerivation {
   pname = "beehive";
