@@ -14,6 +14,8 @@ self: super: {
 
   squeekboard = self.callPackage ./pkgs/squeekboard {};
 
+  megi-call-audio = self.callPackage ./pkgs/megi-call-audio {};
+
   firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
 
   launcher = self.callPackage ./pkgs/launcher {};
