@@ -6,8 +6,9 @@
 , lua53Packages
 , lua5_3
 , lib
+, makeWrapper
+, megi-call-audio
 }:
-# https://github.com/stefano-m/lua-dbus_proxy
 let fennel = fetchurl {
       name = "fennel.lua";
       url = "https://fennel-lang.org/downloads/fennel-1.0.0";
@@ -24,7 +25,12 @@ let fennel = fetchurl {
 in stdenv.mkDerivation {
   pname = "beehive";
   version = "0.0.1";
-  inherit dbusProxy;
+  src =./.;
+  inherit dbusProxy fennel;
   buildInputs = [ lua gtk3 gobject-introspection.dev ];
-  inherit fennel;
+  nativeBuildInputs = [ makeWrapper ];
+  installPhase = ''
+    mkdir -p $out/bin
+    makeWrapper ${./route-audio.sh} $out/bin/route-audio --prefix PATH : ${lib.makeBinPath [ megi-call-audio ]}
+  '';
 }

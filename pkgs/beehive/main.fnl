@@ -1,4 +1,6 @@
+(local lgi (require :lgi))
 (local gtk lgi.Gtk)
+(local calls (require :calls))
 
 (fn window []
   (let [window (gtk.Window {
@@ -8,16 +10,8 @@
                             })]
     (window:show_all)))
 
-(local osk (dbus.Proxy:new
-            {
-             :bus dbus.Bus.SESSION
-             :name "sm.puri.OSK0"
-             :interface "sm.puri.OSK0"
-             :path "/sm/puri/OSK0"
-             }))
+(print "calling " (os.getenv "PHONE"))
+(calls:make-call (os.getenv "PHONE") false)
 
-(comment
- (gtk:main)
- (local osk m.proxy)
- (osk:SetVisible true)
- (osk:SetVisible false))
+(window)
+(gtk:main)

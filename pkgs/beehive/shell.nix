@@ -1,2 +1,4 @@
 with import <nixpkgs> {} ;
-callPackage ./. {}
+callPackage ./. {
+  megi-call-audio = pkgs.callPackage ../megi-call-audio {};
+}
