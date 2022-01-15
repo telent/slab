@@ -43,8 +43,16 @@ compositor (doesn't consume them when it recognises a gesture)
 
 * improve networkmanager ui to work with touch input (nmtui not quite it)
 
-* periodic wake from sleep to check for network activity (emails or
-chat client messages or whatever).
+* sort out sleep
+ - out what we want it to do
+    - periodic wake from sleep to check for network activity (emails or
+      chat client messages or whatever)
+    - sleep on power button
+    - sleep on idle 2 minutes
+    - don't sleep if ssh session non-idle
+ - find out why it's not doing it
+
+
 
    timerfd_create(CLOCK_BOOTTIME_ALARM) apparently does this: write a
    program that calls it in a loop then prods networkmanager to
