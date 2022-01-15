@@ -1,12 +1,15 @@
+(local lgi (require :lgi))
+(local dbus (require :dbus_proxy))
+
 (local gtk lgi.Gtk)
 
-(fn window []
-  (let [window (gtk.Window {
-                            :title "My window"
-                            :default_width 400
-                            :default_height 400
-                            })]
-    (window:show_all)))
+(let [window (gtk.Window {
+                          :title "My window"
+                          :default_width 400
+                          :default_height 400
+                          })]
+  (window:show_all))
+
 
 (local osk (dbus.Proxy:new
             {
@@ -21,3 +24,5 @@
  (local osk m.proxy)
  (osk:SetVisible true)
  (osk:SetVisible false))
+
+{ : osk }
