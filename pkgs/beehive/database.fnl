@@ -59,8 +59,9 @@
         cursor
         (db:execute
          (replace-params db "select source_number, destination_number, start_at, duration, result_code from call where start_at < :end-time order by start_at desc limit :limit"
-                         {:end-time end-time :limit limit}))]
-    (fn [] (cursor:fetch))))
+                         {:end-time end-time :limit limit})) ]
+    (fn []
+      (cursor:fetch {} "a"))))
 
 (fn open []
   {
