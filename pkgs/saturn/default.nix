@@ -15,7 +15,7 @@ let fennel = fetchurl {
       url = "https://fennel-lang.org/downloads/fennel-1.0.0";
       hash = "sha256:1nha32yilzagfwrs44hc763jgwxd700kaik1is7x7lsjjvkgapw7";
     };
-    dbusProxy = callPackage ../beehive/dbus-proxy.nix {
+    dbusProxy = callPackage ./dbus-proxy.nix {
       inherit (lua53Packages) lgi buildLuaPackage;
       lua = lua5_3;
     };
