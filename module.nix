@@ -123,6 +123,12 @@ in {
     # waybar needs one or more of these for icons
     fonts.fonts = with pkgs; [ font-awesome font-awesome-ttf ] ;
 
+    networking.wireless.enable = false;
+
+    networking.networkmanager.enable = true;
+    networking.networkmanager.unmanaged = [ "rndis0" "usb0" ];
+
+
     # XXX need to tighten these down, all we really need is to
     # be able to write some sysfs files
     security.wrappers = {
