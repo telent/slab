@@ -29,7 +29,7 @@
     vals))
 
 (fn all-apps []
-  (var apps-table [])
+  (var apps-table {})
   ;; for i in ${XDG_DATA_DIRS//:/ /} ; do ls $i/applications/*.desktop ;done
   (each [path (string.gmatch (os.getenv "XDG_DATA_DIRS") "[^:]*")]
     (let [apps  (..  path "/applications/")]
@@ -38,7 +38,7 @@
           (when (= (f:sub -8) ".desktop")
             (let [attrs (read-desktop-file (.. apps  f))]
               (when (not attrs.NoDisplay)
-                (table.insert apps-table attrs))))))))
+                (tset apps-table attrs.Name attrs))))))))
   apps-table)
 
 ;; Exec entries in desktop files may contain %u %f and other characters
@@ -74,19 +74,21 @@
     (: :set_image app.IconImage)))
 
 (let [grid (Gtk.Grid {
-;                      :orientation "vertical"
-                      :column_spacing 8
-                      :row_spacing 8
+                      :column_spacing 5
+                      :row_spacing 5
                       })
       scrolled-window (Gtk.ScrolledWindow {})
       window (Gtk.Window {
                           :title "Saturn V"
                           :default_width 720
                           :default_height 800
+                          :on_destroy Gtk.main_quit
                           })]
-  (each [i app (ipairs (all-apps))]
-    (let [x (% (- i 1) 8)
-          y (// (- i 1) 8)]
+  (var i 0)
+  (each [_ app (pairs (all-apps))]
+    (let [x (%  i 4)
+          y (// i 4)]
+      (set i (+ i 1))
       (grid:attach (button-for app) x y 1 1)))
   (scrolled-window:add grid)
   (window:add scrolled-window)
