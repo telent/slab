@@ -39,6 +39,8 @@ in {
       ];
     };
 
+    programs.calls.enable = true;
+
     # this is seven kinds of convoluted, I can only assume because
     # GNOME developers like to cosplay as enterprise admin software
     # developers
