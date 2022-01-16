@@ -1,3 +1,23 @@
+(local dbus (require :dbus_proxy))
+
+(local bus (dbus.Proxy:new
+            {
+             :bus dbus.Bus.SESSION
+             :name "org.freedesktop.DBus"
+             :interface "org.freedesktop.DBus"
+             :path "/org/freedesktop/DBus"
+             }))
+
+(local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
+(let [ret (bus:RequestName "net.telent.saturn" DBUS_NAME_FLAG_DO_NOT_QUEUE)]
+  (if (or (= ret 1) (= ret 4))
+      true
+      (= ret 2)
+      (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
+      (= ret 3)
+      (do
+        (print "already running")
+        (os.exit 0))))
 
 (local lfs (require :lfs))
 (local inifile (require :inifile))
