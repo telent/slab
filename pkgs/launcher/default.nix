@@ -8,6 +8,7 @@
 , mako
 , pinephone-toolkit
 , rustPlatform
+, saturn
 , squeekboard
 , sway
 , swayidle
@@ -37,6 +38,7 @@ let configs = stdenv.mkDerivation {
     paths = lib.concatStringsSep ":"
       (builtins.map (f: "${f}/bin")
         [lisgd swayidle swaylock bemenu squeekboard mako
+         saturn
          pinephone-toolkit
          dialog lisgd
          waybar]);

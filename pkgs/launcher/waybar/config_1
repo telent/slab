@@ -25,7 +25,8 @@
 
     "custom/apps": {
 	"format": "ᐃ",
-	"on-click": "termite -e swayphone_menuselect"
+//	"on-click": "termite -e swayphone_menuselect"
+	"on-click": "saturn"
     },
 
     "custom/keyboard": {

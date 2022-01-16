@@ -18,7 +18,10 @@ self: super: {
 
   firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
 
+  # this is, with hindsight, not a great name
   launcher = self.callPackage ./pkgs/launcher {};
+
+  saturn = self.callPackage ./pkgs/saturn {};
 
   pinephone-toolkit = self.stdenv.mkDerivation {
     name = "pinephone-toolkit";
