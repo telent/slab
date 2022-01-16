@@ -27,6 +27,8 @@ in {
     services.dbus.packages = [ pkgs.squeekboardService ];
     services.logind.extraConfig = ''
       HandlePowerKey=suspend
+      IdleAction=suspend
+      IdleActionSec=2min
     '';
 
     programs.sway = {
