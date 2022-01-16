@@ -261,14 +261,10 @@ exec lisgd -d /dev/input/event3  \
   -g "2,DU,*,*,R,swaymsg exec swayphone_keyboard_show" \
   -g "2,UD,*,*,R,swaymsg exec swayphone_keyboard_hide"
 
-# Status Bar
-# side
-
-# exec "waybar -c ~/.nix-profile/etc/xdg/waybar/config_v -b side"
-# exec "sleep 2 ; kill -10 `pgrep -f 'waybar.*-b side'`"
-
 exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_0 -b top"
 exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_1 -b bottom"
 
 # Restore backlight
 exec 'swayphone_power_wakeup 2> /home/dan/wakeup.log'
+
+exec 'swaymsg layout tabbed'
