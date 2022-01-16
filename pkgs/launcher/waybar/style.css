@@ -16,7 +16,17 @@
     font-weight: bold;
 }
 
+#waybar.bottom {
+    padding: 5px 0;
+    background: transparent;
+}
+
 #custom-apps, #custom-keyboard, #custom.apps, #custom.keyboard {
+    font-weight: normal;
+    font-size: 24px;
+}
+
+window#waybar #custom-kill {
     font-size: 20px;
 }
 
@@ -54,8 +64,6 @@
 #network,
 #pulseaudio,
 #custom-alsa,
-#custom-kill,
-#custom.kill,
 #tray {
 	padding-top: 4px;
 	padding-bottom: 4px;
@@ -139,7 +147,7 @@
 }
 
 #network {
-    background: #98971a;
+    background: #28a71a;
     color: #282828;
 }
 
@@ -157,10 +165,6 @@
     color: #282828;
 }
 
-#custom-kill {
-    background: #a32a03;
-    color: #282828;
-}
 
 #tray {
     background: transparent;
