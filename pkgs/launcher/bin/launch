@@ -1,0 +1,9 @@
+#!/bin/sh
+CONFIGS=${TOP-$(dirname $(realpath $0))/..}
+PATH=/run/wrappers/bin:$PATH
+MOZ_ENABLE_WAYLAND=1
+WAYBAR_CONFIG=${CONFIGS}/etc/xdg/waybar
+export MOZ_ENABLE_WAYLAND WAYBAR_CONFIG
+echo `date` started > $HOME/.sway-log
+sway -c ${CONFIGS}/etc/xdg/sway/config  >> $HOME/.sway-log 2>&1
+echo `date` finished $? >> $HOME/.sway-log
