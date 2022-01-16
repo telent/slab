@@ -43,15 +43,16 @@
     },
 
     "battery": {
-        "interval": 1,
+    	"bat": "axp20x-battery",
+        "interval": 10,
         "states": {
             "warning": 30,
             "critical": 15
         },
         // Connected to AC
-        "format": " {capacity}%", // Icon: bolt
+        "format-charging": " {capacity}%", // Icon: bolt
         // Not connected to AC
-        "format-discharging": " {capacity}%",
+        "format-discharging": " {capacity}%  {power}W",
         "format-icons": [
             "", // Icon: battery-full
             "", // Icon: battery-three-quarters
