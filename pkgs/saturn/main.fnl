@@ -49,19 +49,20 @@
 
 (fn spawn-async [vec]
   (let [pid (posix.unistd.fork)]
-    (if (> pid 0)
-        true
-        (< pid 0)
-        (assert (= "can't spawn" nil))
-        (posix.spawn vec))))
+    (if (> pid 0) true
+        (< pid 0) (assert (= "can't fork" nil))
+        (do
+          (for [f 3 255] (posix.unistd.close f))
+          (posix.execp "/usr/bin/env" vec)))))
 
 (fn launch [app]
 ;  (print (if app.DBusActivatable "dbus" "not dbus"))
   (let [cmd (parse-percents app.Exec)]
     (if app.Terminal
-        (spawn-async ["/usr/bin/env" "kitty" cmd])
-        (spawn-async ["/usr/bin/env" "sh" "-c" cmd]))
-    (os.exit)))
+        (spawn-async ["kitty" cmd])
+        (spawn-async ["sh" "-c" cmd]))
+    (Gtk.main_quit)
+    (os.exit 0)))
 
 (fn button-for [app]
   (doto (Gtk.Button
