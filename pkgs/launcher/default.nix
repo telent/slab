@@ -14,7 +14,7 @@
 , waybar
 } :
 let
-  paths = lib.makeBinPath [
+  deps = [
     bemenu
     dialog
     lisgd
@@ -27,11 +27,13 @@ let
     swaylock
     waybar
   ];
+  paths = lib.makeBinPath deps;
 in stdenv.mkDerivation {
   src = ./.;
   pname = "launcher";
   version = "1";
 
+  buildInputs = deps;
   buildPhase = "true";
   installPhase =
   ''
