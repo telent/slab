@@ -7,8 +7,8 @@ in
 # TODO: add busted and checkPhase?
 buildLuaPackage rec {
   version = "0.10.2";
-  pname = simpleName;
-#  name = "${simpleName}-${version}";
+  pname = simpleName; # nixpkgs unstable needs this
+  name = "${pname}-${version}"; # nixpkgs 21.11 needs this
 
   src = fetchFromGitHub {
     owner = "stefano-m";
@@ -23,7 +23,7 @@ buildLuaPackage rec {
 
   installPhase = ''
     mkdir -p "$out/share/lua/${lua.luaversion}"
-    cp -r src/${simpleName} "$out/share/lua/${lua.luaversion}/"
+    cp -r src/${pname} "$out/share/lua/${lua.luaversion}/"
   '';
 
 }
