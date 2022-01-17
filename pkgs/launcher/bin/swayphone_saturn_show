@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+busctl call --user net.telent.saturn /net/telent/saturn net.telent.saturn SetVisible b true

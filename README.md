@@ -36,12 +36,16 @@ them offscreen. This could be a chunk of work: libinput doesn't and
 won't support touchscreen gestures, lisgd sees the same events as the
 compositor (doesn't consume them when it recognises a gesture)
 
+  - something in the way we start lisgd seems to spawn many many processes
+
 * switch termite for something still maintained (alacritty?)
 
 * don't let sway suspend the device without warning when ssh sessions active
    sudo -b systemd-inhibit --mode=block --why="SSH session" sleep 300
 
 * improve networkmanager ui to work with touch input (nmtui not quite it)
+
+* mobile network
 
 * sort out sleep
  - out what we want it to do
@@ -52,8 +56,6 @@ compositor (doesn't consume them when it recognises a gesture)
     - don't sleep if ssh session non-idle
  - find out why it's not doing it
 
-
-
    timerfd_create(CLOCK_BOOTTIME_ALARM) apparently does this: write a
    program that calls it in a loop then prods networkmanager to
    establish a connection. Anything running that wants to poll a
@@ -62,17 +64,12 @@ compositor (doesn't consume them when it recognises a gesture)
    the battery hit of having 16 apps spin up the radio on 16 different
    five minute intervals
 
-* missings apps
-  - dialler (WIP see pkgs/beehive)
-  - messaging (SMS etc) (chatty will do)
-  - waydroid?
+* find apps
   - totp
+  - megapixels
+  - waydroid?
 
-* touch-aware app laucher?
-
-   all apps: for i in ${XDG_DATA_DIRS//:/ /} ; do ls $i/applications/*.desktop ;done
-
-
+* notifications for incoming voice calls and messages.
 
 * (hardware/pinephone) find out why it doesn't charge on usb2
 
