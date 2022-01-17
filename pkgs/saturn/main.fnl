@@ -46,6 +46,12 @@
 
 (local icon-theme (Gtk.IconTheme.get_default))
 
+(local window (Gtk.Window {
+                           :title "Saturn V"
+                           :default_width 720
+                           :default_height 800
+                           :on_destroy Gtk.main_quit
+                           }))
 (fn find-icon [name]
   (var found false)
   (if (= (name.sub 1 1) "/")
@@ -97,8 +103,7 @@
     (if app.Terminal
         (spawn-async ["kitty" cmd])
         (spawn-async ["sh" "-c" cmd]))
-    (Gtk.main_quit)
-    (os.exit 0)))
+    (window:hide)))
 
 (fn button-for [app]
   (doto (Gtk.Button
@@ -109,12 +114,7 @@
           :on_clicked #(launch app)          })
     (: :set_image app.IconImage)))
 
-(local window (Gtk.Window {
-                           :title "Saturn V"
-                           :default_width 720
-                           :default_height 800
-                           :on_destroy Gtk.main_quit
-                           }))
+
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
   (when (and (= path "/net/telent/saturn")
              (= interface "net.telent.saturn")

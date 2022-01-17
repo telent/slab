@@ -263,6 +263,7 @@ exec lisgd -d /dev/input/event3  \
 
 exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_0 -b top"
 exec "waybar -s $WAYBAR_CONFIG/style.css -c $WAYBAR_CONFIG/config_1 -b bottom"
+exec "saturn"
 
 # Restore backlight
 exec 'swayphone_power_wakeup 2> /home/dan/wakeup.log'
