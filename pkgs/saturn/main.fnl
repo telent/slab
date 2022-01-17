@@ -19,6 +19,8 @@
         (print "already running")
         (os.exit 0))))
 
+;; https://vwangsf.medium.com/creating-a-d-bus-service-with-dbus-python-and-polkit-authentication-4acc9bc5ed29
+
 (local lfs (require :lfs))
 (local inifile (require :inifile))
 (local inspect (require :inspect))
