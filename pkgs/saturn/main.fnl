@@ -1,4 +1,7 @@
+(local lgi (require :lgi))
+(local Gio lgi.Gio)
 (local dbus (require :dbus_proxy))
+(local inspect (require :inspect))
 
 (local bus (dbus.Proxy:new
             {
@@ -7,6 +10,19 @@
              :interface "org.freedesktop.DBus"
              :path "/org/freedesktop/DBus"
              }))
+
+(local interface-info
+       (let [xml
+             "<node>
+                <interface name='net.telent.saturn'>
+                  <method name='SetVisible'>
+                    <arg type='b' name='visible' direction='in'/>
+                  </method>
+                </interface>
+              </node>"
+             node-info (Gio.DBusNodeInfo.new_for_xml xml)]
+         (. node-info.interfaces 1)))
+
 
 (local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
 (let [ret (bus:RequestName "net.telent.saturn" DBUS_NAME_FLAG_DO_NOT_QUEUE)]
@@ -19,14 +35,12 @@
         (print "already running")
         (os.exit 0))))
 
-;; https://vwangsf.medium.com/creating-a-d-bus-service-with-dbus-python-and-polkit-authentication-4acc9bc5ed29
 
 (local lfs (require :lfs))
 (local inifile (require :inifile))
 (local inspect (require :inspect))
 (local posix (require :posix))
 
-(local lgi (require :lgi))
 (local Gtk lgi.Gtk)
 (local Pango lgi.Pango)
 
@@ -95,25 +109,43 @@
           :on_clicked #(launch app)          })
     (: :set_image app.IconImage)))
 
+(local window (Gtk.Window {
+                           :title "Saturn V"
+                           :default_width 720
+                           :default_height 800
+                           :on_destroy Gtk.main_quit
+                           }))
+(fn handle-dbus-method-call [conn sender path interface method params invocation]
+  (when (and (= path "/net/telent/saturn")
+             (= interface "net.telent.saturn")
+             (= method "SetVisible"))
+    (let [[value] (dbus.variant.strip params)]
+      (if value (window:show_all) (window:hide))
+      (invocation:return_value nil))))
+
+(Gio.DBusConnection.register_object
+ bus.connection
+ "/net/telent/saturn"
+ interface-info
+ (lgi.GObject.Closure handle-dbus-method-call)
+ (lgi.GObject.Closure (fn [a] (print "get")))
+ (lgi.GObject.Closure (fn [a] (print "set"))))
+
+(local grid-columns 4)
+
 (let [grid (Gtk.Grid {
-                      :column_spacing 5
+                      :column_spacing 2
                       :row_spacing 5
                       })
-      scrolled-window (Gtk.ScrolledWindow {})
-      window (Gtk.Window {
-                          :title "Saturn V"
-                          :default_width 720
-                          :default_height 800
-                          :on_destroy Gtk.main_quit
-                          })]
+      scrolled-window (Gtk.ScrolledWindow {})]
   (var i 0)
   (each [_ app (pairs (all-apps))]
-    (let [x (%  i 4)
-          y (// i 4)]
+    (let [x (%  i grid-columns)
+          y (// i grid-columns)]
       (set i (+ i 1))
       (grid:attach (button-for app) x y 1 1)))
   (scrolled-window:add grid)
-  (window:add scrolled-window)
-  (window:show_all))
+  (window:add scrolled-window))
 
+(window:show_all)
 (Gtk:main)
