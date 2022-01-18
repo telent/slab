@@ -36,9 +36,17 @@
       (= ret DBUS_REQUEST_NAME_REPLY_IN_QUEUE)
       (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
       (= ret DBUS_REQUEST_NAME_REPLY_EXISTS)
-      (do
-        (print "already running")
-        (os.exit 0))))
+      ;; Show the currently running instance
+      (let [saturn (dbus.Proxy:new
+                     {
+                      :bus dbus.Bus.SESSION
+                      :name "net.telent.saturn"
+                      :interface "net.telent.saturn"
+                      :path "/net/telent/saturn"
+                      })]
+        (saturn:SetVisible true)
+        (os.exit 0)
+        )))
 
 
 (local lfs (require :lfs))
