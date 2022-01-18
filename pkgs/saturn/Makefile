@@ -7,7 +7,7 @@ MODULES=main.fnl
 	lua $(FENNEL) --compile $< > $@
 
 saturn: $(patsubst %.fnl,%.lua,$(MODULES)) Makefile
-	(echo -e "#!/usr/bin/lua\n" ; cat main.lua ) > $@
+	(echo -e "#!/usr/bin/env lua\n" ; cat main.lua ) > $@
 	chmod +x $@
 
 install:
