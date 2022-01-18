@@ -3,6 +3,14 @@
 (local dbus (require :dbus_proxy))
 (local inspect (require :inspect))
 
+(local dbus-service-attrs
+       {
+        :bus dbus.Bus.SESSION
+        :name "net.telent.saturn"
+        :interface "net.telent.saturn"
+        :path "/net/telent/saturn"
+        })
+
 (local bus (dbus.Proxy:new
             {
              :bus dbus.Bus.SESSION
@@ -25,15 +33,25 @@
 
 
 (local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
-(let [ret (bus:RequestName "net.telent.saturn" DBUS_NAME_FLAG_DO_NOT_QUEUE)]
-  (if (or (= ret 1) (= ret 4))
-      true
-      (= ret 2)
-      (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
-      (= ret 3)
-      (do
-        (print "already running")
-        (os.exit 0))))
+(local DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER 1)
+(local DBUS_REQUEST_NAME_REPLY_IN_QUEUE 2)
+(local DBUS_REQUEST_NAME_REPLY_EXISTS 3)
+(local DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER 4)
+
+(let [ret (bus:RequestName dbus-service-attrs.name
+                           DBUS_NAME_FLAG_DO_NOT_QUEUE)]
+  (match ret
+    DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER
+    true
+    DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER
+    true
+    DBUS_REQUEST_NAME_REPLY_IN_QUEUE
+    (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
+    DBUS_REQUEST_NAME_REPLY_EXISTS
+    ;; Show the currently running instance
+    (let [saturn (dbus.Proxy:new dbus-service-attrs)]
+      (saturn:SetVisible true)
+      (os.exit 0))))
 
 
 (local lfs (require :lfs))
@@ -67,12 +85,12 @@
 (fn read-desktop-file [f]
   (let [parsed (inifile.parse f)
         vals (. parsed "Desktop Entry")]
-    (when vals.Icon (tset vals "IconImage" (find-icon vals.Icon)))
+    (when vals.Icon
+      (tset vals "IconImage" (find-icon vals.Icon)))
     vals))
 
 (fn all-apps []
   (var apps-table {})
-  ;; for i in ${XDG_DATA_DIRS//:/ /} ; do ls $i/applications/*.desktop ;done
   (each [path (string.gmatch (os.getenv "XDG_DATA_DIRS") "[^:]*")]
     (let [apps  (..  path "/applications/")]
       (when (lfs.attributes apps)
@@ -84,8 +102,9 @@
   apps-table)
 
 ;; Exec entries in desktop files may contain %u %f and other characters
-;; in which the launcheris supposed to interpolate filenames/urls etc.
-;; We don't
+;; in which the launcher is supposed to interpolate filenames/urls etc.
+;; We don't afford the user any way to pick filenames, but we do need
+;; to remove the placeholders.
 (fn parse-percents [str]
   (str:gsub "%%(.)" (fn [c] (if (= c "%") "%" ""))))
 
@@ -98,7 +117,7 @@
           (posix.execp "/usr/bin/env" vec)))))
 
 (fn launch [app]
-;  (print (if app.DBusActivatable "dbus" "not dbus"))
+  ;; FIXME check app.DBusActivatable and do DBus launch if true
   (let [cmd (parse-percents app.Exec)]
     (if app.Terminal
         (spawn-async ["kitty" cmd])
@@ -116,8 +135,8 @@
 
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
-  (when (and (= path "/net/telent/saturn")
-             (= interface "net.telent.saturn")
+  (when (and (= path dbus-service-attrs.path)
+             (= interface dbus-service-attrs.interface)
              (= method "SetVisible"))
     (let [[value] (dbus.variant.strip params)]
       (if value (window:show_all) (window:hide))
@@ -125,21 +144,21 @@
 
 (Gio.DBusConnection.register_object
  bus.connection
- "/net/telent/saturn"
+ dbus-service-attrs.path
  interface-info
  (lgi.GObject.Closure handle-dbus-method-call)
  (lgi.GObject.Closure (fn [a] (print "get")))
  (lgi.GObject.Closure (fn [a] (print "set"))))
 
-(local grid-columns 4)
-
 (let [grid (Gtk.FlowBox {
-                      :column_spacing 2
-                      :row_spacing 5
-                      })
+                         :orientation Gtk.Orientation.HORIZONTAL
+                         :valign Gtk.Align.START
+                         :column_spacing 2
+                         :row_spacing 5
+                         })
       scrolled-window (Gtk.ScrolledWindow {})]
   (each [_ app (pairs (all-apps))]
-      (grid:insert (button-for app) -1))
+    (grid:insert (button-for app) -1))
   (scrolled-window:add grid)
   (window:add scrolled-window))
 
