@@ -25,15 +25,28 @@
 
 
 (local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
+(local DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER 1)
+(local DBUS_REQUEST_NAME_REPLY_IN_QUEUE 2)
+(local DBUS_REQUEST_NAME_REPLY_EXISTS 3)
+(local DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER 4)
+
 (let [ret (bus:RequestName "net.telent.saturn" DBUS_NAME_FLAG_DO_NOT_QUEUE)]
-  (if (or (= ret 1) (= ret 4))
+  (if (or (= ret DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) (= ret DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER))
       true
-      (= ret 2)
+      (= ret DBUS_REQUEST_NAME_REPLY_IN_QUEUE)
       (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
-      (= ret 3)
-      (do
-        (print "already running")
-        (os.exit 0))))
+      (= ret DBUS_REQUEST_NAME_REPLY_EXISTS)
+      ;; Show the currently running instance
+      (let [saturn (dbus.Proxy:new
+                     {
+                      :bus dbus.Bus.SESSION
+                      :name "net.telent.saturn"
+                      :interface "net.telent.saturn"
+                      :path "/net/telent/saturn"
+                      })]
+        (saturn:SetVisible true)
+        (os.exit 0)
+        )))
 
 
 (local lfs (require :lfs))
