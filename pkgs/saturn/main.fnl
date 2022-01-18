@@ -133,17 +133,13 @@
 
 (local grid-columns 4)
 
-(let [grid (Gtk.Grid {
+(let [grid (Gtk.FlowBox {
                       :column_spacing 2
                       :row_spacing 5
                       })
       scrolled-window (Gtk.ScrolledWindow {})]
-  (var i 0)
   (each [_ app (pairs (all-apps))]
-    (let [x (%  i grid-columns)
-          y (// i grid-columns)]
-      (set i (+ i 1))
-      (grid:attach (button-for app) x y 1 1)))
+      (grid:insert (button-for app) -1))
   (scrolled-window:add grid)
   (window:add scrolled-window))
 
