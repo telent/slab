@@ -3,6 +3,14 @@
 (local dbus (require :dbus_proxy))
 (local inspect (require :inspect))
 
+(local dbus-service-attrs
+       {
+        :bus dbus.Bus.SESSION
+        :name "net.telent.saturn"
+        :interface "net.telent.saturn"
+        :path "/net/telent/saturn"
+        })
+
 (local bus (dbus.Proxy:new
             {
              :bus dbus.Bus.SESSION
@@ -30,23 +38,20 @@
 (local DBUS_REQUEST_NAME_REPLY_EXISTS 3)
 (local DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER 4)
 
-(let [ret (bus:RequestName "net.telent.saturn" DBUS_NAME_FLAG_DO_NOT_QUEUE)]
-  (if (or (= ret DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) (= ret DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER))
-      true
-      (= ret DBUS_REQUEST_NAME_REPLY_IN_QUEUE)
-      (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
-      (= ret DBUS_REQUEST_NAME_REPLY_EXISTS)
-      ;; Show the currently running instance
-      (let [saturn (dbus.Proxy:new
-                     {
-                      :bus dbus.Bus.SESSION
-                      :name "net.telent.saturn"
-                      :interface "net.telent.saturn"
-                      :path "/net/telent/saturn"
-                      })]
-        (saturn:SetVisible true)
-        (os.exit 0)
-        )))
+(let [ret (bus:RequestName dbus-service-attrs.name
+                           DBUS_NAME_FLAG_DO_NOT_QUEUE)]
+  (match ret
+    DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER
+    true
+    DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER
+    true
+    DBUS_REQUEST_NAME_REPLY_IN_QUEUE
+    (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
+    DBUS_REQUEST_NAME_REPLY_EXISTS
+    ;; Show the currently running instance
+    (let [saturn (dbus.Proxy:new dbus-service-attrs)]
+      (saturn:SetVisible true)
+      (os.exit 0))))
 
 
 (local lfs (require :lfs))
@@ -80,7 +85,8 @@
 (fn read-desktop-file [f]
   (let [parsed (inifile.parse f)
         vals (. parsed "Desktop Entry")]
-    (when vals.Icon (tset vals "IconImage" (find-icon vals.Icon)))
+    (when vals.Icon
+      (tset vals "IconImage" (find-icon vals.Icon)))
     vals))
 
 (fn all-apps []
@@ -129,8 +135,8 @@
 
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
-  (when (and (= path "/net/telent/saturn")
-             (= interface "net.telent.saturn")
+  (when (and (= path dbus-service-attrs.path)
+             (= interface dbus-service-attrs.interface)
              (= method "SetVisible"))
     (let [[value] (dbus.variant.strip params)]
       (if value (window:show_all) (window:hide))
@@ -138,7 +144,7 @@
 
 (Gio.DBusConnection.register_object
  bus.connection
- "/net/telent/saturn"
+ dbus-service-attrs.path
  interface-info
  (lgi.GObject.Closure handle-dbus-method-call)
  (lgi.GObject.Closure (fn [a] (print "get")))
