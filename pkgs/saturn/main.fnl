@@ -131,15 +131,15 @@
  (lgi.GObject.Closure (fn [a] (print "get")))
  (lgi.GObject.Closure (fn [a] (print "set"))))
 
-(local grid-columns 4)
-
 (let [grid (Gtk.FlowBox {
-                      :column_spacing 2
-                      :row_spacing 5
-                      })
+                         :orientation Gtk.Orientation.HORIZONTAL
+                         :valign Gtk.Align.START
+                         :column_spacing 2
+                         :row_spacing 5
+                         })
       scrolled-window (Gtk.ScrolledWindow {})]
   (each [_ app (pairs (all-apps))]
-      (grid:insert (button-for app) -1))
+    (grid:insert (button-for app) -1))
   (scrolled-window:add grid)
   (window:add scrolled-window))
 
