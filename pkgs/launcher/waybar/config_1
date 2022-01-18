@@ -23,7 +23,7 @@
 
     "custom/apps": {
 	"format": "ᐃ",
-	"on-click": "swayphone_saturn_show"
+	"on-click": "swayphone_saturn_toggle"
     },
 
     "custom/keyboard": {
