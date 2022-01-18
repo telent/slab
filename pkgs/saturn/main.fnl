@@ -85,7 +85,6 @@
 
 (fn all-apps []
   (var apps-table {})
-  ;; for i in ${XDG_DATA_DIRS//:/ /} ; do ls $i/applications/*.desktop ;done
   (each [path (string.gmatch (os.getenv "XDG_DATA_DIRS") "[^:]*")]
     (let [apps  (..  path "/applications/")]
       (when (lfs.attributes apps)
@@ -97,8 +96,9 @@
   apps-table)
 
 ;; Exec entries in desktop files may contain %u %f and other characters
-;; in which the launcheris supposed to interpolate filenames/urls etc.
-;; We don't
+;; in which the launcher is supposed to interpolate filenames/urls etc.
+;; We don't afford the user any way to pick filenames, but we do need
+;; to remove the placeholders.
 (fn parse-percents [str]
   (str:gsub "%%(.)" (fn [c] (if (= c "%") "%" ""))))
 
@@ -111,7 +111,7 @@
           (posix.execp "/usr/bin/env" vec)))))
 
 (fn launch [app]
-;  (print (if app.DBusActivatable "dbus" "not dbus"))
+  ;; FIXME check app.DBusActivatable and do DBus launch if true
   (let [cmd (parse-percents app.Exec)]
     (if app.Terminal
         (spawn-async ["kitty" cmd])
