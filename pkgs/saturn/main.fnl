@@ -25,13 +25,23 @@
                 <interface name='net.telent.saturn'>
                   <method name='SetVisible'>
                     <arg type='b' name='visible' direction='in'/>
+                    <doc:doc><doc:description>
+                      Switch visibility of launcher window
+                    </doc:description></doc:doc>
                   </method>
+                  <method name='ToggleVisible'>
+                    <doc:doc><doc:description>
+                      Toggle launcher window visible/invisible
+                    </doc:description></doc:doc>
+                  </method>
+                  <property name='Visible' type='b' access='read'>
+                  </property>
                 </interface>
               </node>"
              node-info (Gio.DBusNodeInfo.new_for_xml xml)]
          (. node-info.interfaces 1)))
 
-
+;; these values don't seem to be available through introspection
 (local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
 (local DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER 1)
 (local DBUS_REQUEST_NAME_REPLY_IN_QUEUE 2)
@@ -43,10 +53,13 @@
   (match ret
     DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER
     true
+
     DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER
     true
+
     DBUS_REQUEST_NAME_REPLY_IN_QUEUE
     (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
+
     DBUS_REQUEST_NAME_REPLY_EXISTS
     ;; Show the currently running instance
     (let [saturn (dbus.Proxy:new dbus-service-attrs)]
@@ -136,18 +149,29 @@
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
   (when (and (= path dbus-service-attrs.path)
+             (= interface dbus-service-attrs.interface))
+    (match method
+      "SetVisible"
+      (let [[value] (dbus.variant.strip params)]
+        (if value (window:show_all) (window:hide))
+        (invocation:return_value nil))
+      "ToggleVisible"
+      (let [v window.visible]
+        (if v (window:hide) (window:show_all))
+        (invocation:return_value nil)))))
+
+(fn handle-dbus-get [conn sender path interface name]
+  (when (and (= path dbus-service-attrs.path)
              (= interface dbus-service-attrs.interface)
-             (= method "SetVisible"))
-    (let [[value] (dbus.variant.strip params)]
-      (if value (window:show_all) (window:hide))
-      (invocation:return_value nil))))
+             (= name "Visible"))
+    (lgi.GLib.Variant "b" window.visible)))
 
 (Gio.DBusConnection.register_object
  bus.connection
  dbus-service-attrs.path
  interface-info
  (lgi.GObject.Closure handle-dbus-method-call)
- (lgi.GObject.Closure (fn [a] (print "get")))
+ (lgi.GObject.Closure handle-dbus-get)
  (lgi.GObject.Closure (fn [a] (print "set"))))
 
 (let [grid (Gtk.FlowBox {
