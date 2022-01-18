@@ -231,6 +231,10 @@ output DSI-1 scale 2
 
 input 1046:4097:Goodix_Capacitive_TouchScreen map_to_output DSI-1
 
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+
 exec swayphone_rotate
 
 # Keyboard

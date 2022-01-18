@@ -24,7 +24,7 @@ in {
       gnome3.adwaita-icon-theme
     ];
 
-    services.dbus.packages = [ pkgs.squeekboardService ];
+    services.dbus.packages = [ pkgs.squeekboardService pkgs.saturn ];
     services.logind.extraConfig = ''
       HandlePowerKey=suspend
       IdleAction=suspend
