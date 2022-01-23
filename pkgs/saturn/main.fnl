@@ -95,7 +95,12 @@
 
 (local path {
              :absolute? (fn [str] (= (str:sub 1 1) "/"))
+             :concat (fn [...] (table.concat [...] "/"))
              })
+(local search-path {
+                    :concat (fn [...] (table.concat [...] ":"))
+                    })
+
 (local Gtk lgi.Gtk)
 (local GdkPixbuf lgi.GdkPixbuf)
 (local Gdk lgi.Gdk)
@@ -153,9 +158,30 @@
       (tset vals "IconImage" (find-icon vals.Icon)))
     vals))
 
+(fn current-user-home []
+  "Returns current user's home directory."
+  (-> (posix.unistd.getuid)
+      (posix.pwd.getpwuid)
+      (. :pw_dir)))
+
+(fn xdg-data-home []
+  "Provides XDG_DATA_HOME or its default fallback value"
+  (local data-home (os.getenv "XDG_DATA_HOME"))
+  (if data-home
+    data-home
+    (path.concat (current-user-home) ".local/share/")))
+
+(fn xdg-data-dirs []
+  "Provides all data-dirs as a colon-separated string."
+  ;; Expected to be used with gmatch as a generator.
+  (search-path.concat
+    (xdg-data-home)
+    (os.getenv "XDG_DATA_DIRS")
+    ))
+
 (fn all-apps []
   (var apps-table {})
-  (each [path (string.gmatch (os.getenv "XDG_DATA_DIRS") "[^:]*")]
+  (each [path (string.gmatch (xdg-data-dirs) "[^:]*")]
     (let [apps  (..  path "/applications/")]
       (when (lfs.attributes apps)
         (each [f (lfs.dir apps)]
