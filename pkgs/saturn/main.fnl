@@ -92,6 +92,7 @@
 (local inifile (require :inifile))
 (local List (require "pl.List"))
 (local stringx (require "pl.stringx"))
+(local tablex (require "pl.tablex"))
 (local inspect (require :inspect))
 (local posix (require :posix))
 
@@ -184,19 +185,26 @@
   ))
 
 (fn all-apps []
+  ;; Each desktop entry representing an application is identified
+  ;; by its desktop file ID, which is based on its filename.
+  ;;  — https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#desktop-file-id
+  "Provides apps in a List, sorted by name"
   (var apps-table {})
   ;; Reversing the data dirs gives priority to the first elements.
   ;; This means conflicting `.desktop` files (or: desktop file ID) are given
   ;; priority to the first elements by "simply" reading it last.
   (each [path (List.iter (List.reverse (xdg-data-dirs)))]
-    (let [apps  (..  path "/applications/")]
-      (when (lfs.attributes apps)
-        (each [f (lfs.dir apps)]
+    (let [apps-dir (..  path "/applications/")]
+      (when (lfs.attributes apps-dir)
+        (each [f (lfs.dir apps-dir)]
           (when (= (f:sub -8) ".desktop")
-            (let [attrs (read-desktop-file (.. apps  f))]
+            (let [attrs (read-desktop-file (.. apps-dir  f))]
               (when (not attrs.NoDisplay)
-                (tset apps-table attrs.Name attrs))))))))
-  apps-table)
+                (tset apps-table attrs.ID attrs))))))))
+  ;; We have a table indexed by IDs, we don't care about the indexing.
+  ;; Make a List and sort it by name.
+  (List.sort (List (tablex.values apps-table))
+    (fn [a b] (< (string.upper a.Name) (string.upper b.Name)))))
 
 ;; Exec entries in desktop files may contain %u %f and other characters
 ;; in which the launcher is supposed to interpolate filenames/urls etc.
@@ -265,7 +273,7 @@
                          :row_spacing 5
                          })
       scrolled-window (Gtk.ScrolledWindow {})]
-  (each [_ app (pairs (all-apps))]
+  (each [app (List.iter (all-apps))]
     (grid:insert (button-for app) -1))
   (scrolled-window:add grid)
   (window:add scrolled-window))
