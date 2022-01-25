@@ -90,6 +90,8 @@
 
 (local lfs (require :lfs))
 (local inifile (require :inifile))
+(local List (require "pl.List"))
+(local stringx (require "pl.stringx"))
 (local inspect (require :inspect))
 (local posix (require :posix))
 
@@ -173,16 +175,20 @@
     (path.concat (current-user-home) ".local/share/")))
 
 (fn xdg-data-dirs []
-  "Provides all data-dirs as a colon-separated string."
+  "Provides all data-dirs as a List. Most important first."
   ;; Expected to be used with gmatch as a generator.
-  (search-path.concat
-    (xdg-data-home)
-    (os.getenv "XDG_DATA_DIRS")
-    ))
+  (let [dirs (List)]
+  (dirs:append (xdg-data-home))
+  (dirs:extend (stringx.split (os.getenv "XDG_DATA_DIRS") ":"))
+  dirs
+  ))
 
 (fn all-apps []
   (var apps-table {})
-  (each [path (string.gmatch (xdg-data-dirs) "[^:]*")]
+  ;; Reversing the data dirs gives priority to the first elements.
+  ;; This means conflicting `.desktop` files (or: desktop file ID) are given
+  ;; priority to the first elements by "simply" reading it last.
+  (each [path (List.iter (List.reverse (xdg-data-dirs)))]
     (let [apps  (..  path "/applications/")]
       (when (lfs.attributes apps)
         (each [f (lfs.dir apps)]
