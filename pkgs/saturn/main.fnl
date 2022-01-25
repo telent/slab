@@ -156,6 +156,7 @@
         vals (. parsed "Desktop Entry")]
     (when vals.Icon
       (tset vals "IconImage" (find-icon vals.Icon)))
+    (tset vals "ID" (f:sub 0 -9))
     vals))
 
 (fn current-user-home []
