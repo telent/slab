@@ -21,7 +21,9 @@ in {
       squeekboardService
       firefoxMobile
       launcher
+      # alacritty
       gnome3.adwaita-icon-theme
+      git vim
     ];
 
     services.dbus.packages = [ pkgs.squeekboardService pkgs.saturn ];
@@ -34,8 +36,18 @@ in {
     programs.sway = {
       enable = true;
       extraPackages = with pkgs; [
-        swaylock swayidle xwayland termite
-        mako grim slurp wl-clipboard wf-recorder
+        grim
+        mako
+        megapixels
+        numberstation
+        netsurf-browser
+        slurp
+        swayidle
+        swaylock
+        termite
+        wf-recorder
+        wl-clipboard
+        xwayland
       ];
     };
 
