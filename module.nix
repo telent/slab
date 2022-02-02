@@ -12,6 +12,12 @@ in {
       type = lib.types.str;
       default = "dan";
     };
+    lockPinFile = lib.mkOption {
+      type = lib.types.str;
+    };
+    lockPicture = lib.mkOption {
+      type = lib.types.str;
+    };
   };
   config = {
     nixpkgs.overlays = [ (import ./overlay.nix) ] ;
@@ -30,7 +36,7 @@ in {
     services.logind.extraConfig = ''
       HandlePowerKey=suspend
       IdleAction=suspend
-      IdleActionSec=2min
+      IdleActionSec=1min
     '';
 
     programs.sway = {
@@ -43,7 +49,7 @@ in {
         netsurf-browser
         slurp
         swayidle
-        swaylock
+        schlock
         termite
         wf-recorder
         wl-clipboard
@@ -111,11 +117,13 @@ in {
         let run-sway = pkgs.writeScript "run-sway" ''
           #!${pkgs.bash}/bin/bash
           source ${config.system.build.setEnvironment}
+          SCHLOCK_PIN_FILE=${cfg.lockPinFile}
+          SCHLOCK_PICTURE=${cfg.lockPicture}
+          export SCHLOCK_PICTURE SCHLOCK_PIN_FILE
           ${pkgs.dbus}/bin/dbus-run-session ${pkgs.launcher}/bin/launch
           systemd-cat echo "dbus-run-session $?"
         '';
         in {
-#          ExecStartPre = "${config.system.path}/bin/chvt 6";
           ExecStart = run-sway;
           TTYPath = "/dev/tty${cfg.ttyNumber}";
           TTYReset = "yes";

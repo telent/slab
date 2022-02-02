@@ -32,6 +32,13 @@ self: super: {
 
   saturn = self.callPackage ./pkgs/saturn {};
 
+  schlock = self.callPackage (self.fetchFromGitHub {
+    owner = "telent";
+    repo = "schlock";
+    rev = "65b34b7160c188fa8fc2d8d756d3f022cb5700ed";
+    hash = "sha256-bHBrtn2HoKW5f8dEzrKNBPdXWds8UgXTEgRXbIUwPZw=";
+  }) {};
+
   squeekboard = self.callPackage ./pkgs/squeekboard {};
 
   squeekboardService = self.stdenv.mkDerivation {

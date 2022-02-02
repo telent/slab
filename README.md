@@ -23,9 +23,6 @@ Right now - it might be responsive, but it's not very usable
 
 "everything"
 
-* need a key/pin lock of some kind (swaylock doesn't open onscreen
-  keyboard so can't use it)
-
 * keyboard
   - arrow keys are half-size
   - ctrl key is sticky (https://github.com/valderman/squeekboard-sway/commit/0ae1313659d4d7569169c75c5363a18580497e17 is a clue)
@@ -65,8 +62,6 @@ compositor (doesn't consume them when it recognises a gesture)
    five minute intervals
 
 * find apps
-  - totp
-  - megapixels
   - waydroid?
 
 * notifications for incoming voice calls and messages.
