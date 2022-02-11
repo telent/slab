@@ -9,7 +9,6 @@
 
 (local inspect (require :inspect))
 
-
 (local dbus-service-attrs
        {
         :bus dbus.Bus.SESSION
@@ -96,7 +95,7 @@
 
 (var notification-id 10)
 (fn next-notification-id []
-  (set notification-id  (+ notification-id  1))
+  (set notification-id  (+ notification-id 1))
   notification-id)
 
 (fn update-notification-widget [widget noti]
