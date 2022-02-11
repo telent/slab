@@ -88,7 +88,6 @@
 
 (fn update-window []
   (each [id widget (pairs notifications)]
-    (print id (widget:get_parent))
     (if (not (widget:get_parent))
         (window.box:pack_start widget false false 5)))
   (if (next notifications)
@@ -103,7 +102,6 @@
 (fn delete-notification [id]
   (let [widget (. notifications id)]
     (tset notifications id nil)
-    (print "delete " id widget (inspect notifications))
     (window.box:remove widget)
     (update-window)
     ))
@@ -139,7 +137,6 @@
                  (set body.label value))
      :set-icon (fn [self value]
                  (when value
-                   (print value)
                    (icon:set_from_icon_name
                     value
                     Gtk.IconSize.DND
