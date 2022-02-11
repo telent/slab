@@ -1,0 +1,10 @@
+box#notification {
+    border-width: 1px;
+    border-style: solid;
+    margin: 2px 4px;
+    border-color: #999999;
+    padding: 4px;
+}
+label#summary {
+    font-weight: bold;
+}

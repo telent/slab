@@ -49,6 +49,15 @@
     DBUS_REQUEST_NAME_REPLY_EXISTS
     (error "already running")))
 
+(let [css (: (io.open "styles.css") :read "*a")
+      style_provider (Gtk.CssProvider)]
+  (style_provider:load_from_data css)
+  (Gtk.StyleContext.add_provider_for_screen
+   (lgi.Gdk.Screen.get_default)
+   style_provider
+   Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+   ))
+
 ;; for each open message there is a widget
 ;; when a message is closed, we need to find its widget
 ;; and remove it from the container
@@ -64,6 +73,7 @@
       (GtkLayerShell.init_for_window window)
       (GtkLayerShell.set_layer window GtkLayerShell.Layer.TOP)
       (GtkLayerShell.auto_exclusive_zone_enable window)
+
       (GtkLayerShell.set_margin window GtkLayerShell.Edge.TOP 1)
       (GtkLayerShell.set_margin window GtkLayerShell.Edge.BOTTOM 10)
 
