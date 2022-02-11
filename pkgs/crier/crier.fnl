@@ -91,12 +91,22 @@
     (print id (widget:get_parent))
     (if (not (widget:get_parent))
         (window.box:pack_start widget false false 5)))
-  (if (next notifications) (window.window:show_all) (window:hide)))
+  (if (next notifications)
+      (window.window:show_all)
+      (window.window:hide)))
 
 (var notification-id 10)
 (fn next-notification-id []
   (set notification-id  (+ notification-id 1))
   notification-id)
+
+(fn delete-notification [id]
+  (let [widget (. notifications id)]
+    (tset notifications id nil)
+    (print "delete " id widget (inspect notifications))
+    (window.box:remove widget)
+    (update-window)
+    ))
 
 (fn update-notification-widget [widget noti]
   (doto widget
@@ -104,10 +114,14 @@
     (: :set-body noti.body)
     (: :set-icon noti.app-icon)))
 
-(fn make-notification-widget []
+(fn make-notification-widget [id]
   (let [summary (Gtk.Label { :name "summary" })
         body (Gtk.Label)
         icon  (Gtk.Image)
+        cancel-me (fn [] (delete-notification id))
+        event-box (Gtk.EventBox {
+                                 :on_button_press_event cancel-me
+                                 })
         hbox (Gtk.Box {
                        :name "notification"
                        :orientation Gtk.Orientation.HORIZONTAL
@@ -117,6 +131,7 @@
     (vbox:pack_start body true false 0)
     (hbox:pack_start icon false false 0)
     (hbox:pack_start vbox true true 0)
+    (event-box:add hbox)
     {
      :set-summary (fn [self value]
                     (set summary.label value))
@@ -129,12 +144,12 @@
                     value
                     Gtk.IconSize.DND
                     )))
-     :widget hbox
+     :widget event-box
      }))
 
 (fn add-notification [noti]
   (let [id (if (= noti.id 0) (next-notification-id) noti.id)
-        widget (or (. notifications id) (make-notification-widget))]
+        widget (or (. notifications id) (make-notification-widget id))]
     (update-notification-widget widget noti)
     (tset notifications id widget.widget)
     (update-window)
