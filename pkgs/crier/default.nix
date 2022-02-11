@@ -4,6 +4,7 @@
 , fetchurl
 , gobject-introspection
 , gtk3
+, gtk-layer-shell
 , lib
 , librsvg
 , lua53Packages
@@ -35,7 +36,12 @@ in stdenv.mkDerivation {
   src =./.;
   inherit fennel;
 
-  buildInputs = [ lua gtk3 gobject-introspection.dev ];
+  buildInputs = [
+    gobject-introspection.dev
+    gtk-layer-shell
+    gtk3
+    lua
+  ];
   nativeBuildInputs = [ lua makeWrapper ];
 
   makeFlags = [ "PREFIX=${placeholder "out"}" ];

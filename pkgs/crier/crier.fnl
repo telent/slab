@@ -3,9 +3,11 @@
 (local Gio lgi.Gio)
 (local GLib lgi.GLib)
 (local GV lgi.GLib.Variant)
+(local GtkLayerShell lgi.GtkLayerShell)
 (local variant dbus.variant)
-(local inspect (require :inspect))
 (local Gtk lgi.Gtk)
+
+(local inspect (require :inspect))
 
 
 (local dbus-service-attrs
@@ -47,11 +49,63 @@
     DBUS_REQUEST_NAME_REPLY_EXISTS
     (error "already running")))
 
+;; for each open message there is a widget
+;; when a message is closed, we need to find its widget
+;; and remove it from the container
+;; if there are no messages left, hide the windox
+
+(fn make-window []
+  (let [window (Gtk.Window {:width 360
+                            :on_destroy Gtk.main_quit})
+        box (Gtk.Box {
+                      :orientation Gtk.Orientation.VERTICAL
+                      })]
+    (window:add box)
+    (when true
+      (GtkLayerShell.init_for_window window)
+      (GtkLayerShell.set_layer window GtkLayerShell.Layer.TOP)
+      (GtkLayerShell.auto_exclusive_zone_enable window)
+      (GtkLayerShell.set_margin window GtkLayerShell.Edge.TOP 1)
+      (GtkLayerShell.set_margin window GtkLayerShell.Edge.BOTTOM 10)
+      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.TOP 1))
+    (window:hide)
+    {:window window :box box}))
+
+(local window (make-window))
+
+(local notifications {})
+
+(fn update-window []
+  (each [id widget (pairs notifications)]
+    (print id (widget:get_parent))
+    (if (not (widget:get_parent))
+        (window.box:pack_start widget false false 5)))
+  (if (next notifications) (window.window:show_all) (window:hide)))
+
 (var notification-id 10)
-(fn next-id []
+(fn next-notification-id []
   (set notification-id  (+ notification-id  1))
   notification-id)
 
+(fn update-notification-widget [widget noti]
+  (set widget.label noti.summary))
+
+(fn add-notification [noti]
+  (let [id (if (= noti.id 0) (next-notification-id) noti.id)
+        widget (or (. notifications id)
+                   (Gtk.Label))]
+    (update-notification-widget widget noti)
+    (tset notifications id widget)
+    (update-window)
+    id))
+
+(fn make-notification [params]
+  {
+   :sender (. params 1)
+   :id (. params 2)
+   :summary (. params 4)
+   :body (. params 6)
+   })
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
   (when (and (= path dbus-service-attrs.path)
@@ -68,9 +122,11 @@
                      "1.2"]))
 
       "Notify"
-      (let [p params]
-        (print (inspect (dbus.variant.strip p)))
-        (invocation:return_value (GV "(u)" [(next-id)]))))))
+      (let [p (dbus.variant.strip params)
+            n (make-notification p)]
+        (invocation:return_value (GV "(u)"
+                                     [(add-notification n)])))
+      )))
 
 (fn handle-dbus-get [conn sender path interface name]
   (when (and (= path dbus-service-attrs.path)
