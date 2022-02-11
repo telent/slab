@@ -90,14 +90,44 @@
   notification-id)
 
 (fn update-notification-widget [widget noti]
-  (set widget.label noti.summary))
+  (doto widget
+    (: :set-summary noti.summary)
+    (: :set-body noti.body)
+    (: :set-icon noti.app-icon)))
+
+(fn make-notification-widget []
+  (let [summary (Gtk.Label { :name "summary" })
+        body (Gtk.Label)
+        icon  (Gtk.Image)
+        hbox (Gtk.Box {
+                       :name "notification"
+                       :orientation Gtk.Orientation.HORIZONTAL
+                       })
+        vbox (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})]
+    (vbox:pack_start summary false false 0)
+    (vbox:pack_start body true false 0)
+    (hbox:pack_start icon false false 0)
+    (hbox:pack_start vbox true true 0)
+    {
+     :set-summary (fn [self value]
+                    (set summary.label value))
+     :set-body (fn [self value]
+                 (set body.label value))
+     :set-icon (fn [self value]
+                 (when value
+                   (print value)
+                   (icon:set_from_icon_name
+                    value
+                    Gtk.IconSize.DND
+                    )))
+     :widget hbox
+     }))
 
 (fn add-notification [noti]
   (let [id (if (= noti.id 0) (next-notification-id) noti.id)
-        widget (or (. notifications id)
-                   (Gtk.Label))]
+        widget (or (. notifications id) (make-notification-widget))]
     (update-notification-widget widget noti)
-    (tset notifications id widget)
+    (tset notifications id widget.widget)
     (update-window)
     id))
 
@@ -105,8 +135,9 @@
   {
    :sender (. params 1)
    :id (. params 2)
+   :app-icon (. params 3)
    :summary (. params 4)
-   :body (. params 6)
+   :body (. params 5)
    })
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
