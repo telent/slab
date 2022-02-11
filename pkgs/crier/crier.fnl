@@ -55,8 +55,7 @@
 ;; if there are no messages left, hide the windox
 
 (fn make-window []
-  (let [window (Gtk.Window {:width 360
-                            :on_destroy Gtk.main_quit})
+  (let [window (Gtk.Window {:on_destroy Gtk.main_quit})
         box (Gtk.Box {
                       :orientation Gtk.Orientation.VERTICAL
                       })]
@@ -67,7 +66,10 @@
       (GtkLayerShell.auto_exclusive_zone_enable window)
       (GtkLayerShell.set_margin window GtkLayerShell.Edge.TOP 1)
       (GtkLayerShell.set_margin window GtkLayerShell.Edge.BOTTOM 10)
-      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.TOP 1))
+
+      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.TOP 1)
+      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.LEFT 1)
+      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.RIGHT 1))
     (window:hide)
     {:window window :box box}))
 
