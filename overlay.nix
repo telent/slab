@@ -1,27 +1,19 @@
 self: super: {
-  squeekboardService = self.stdenv.mkDerivation {
-    name = "squeekboard.service";
-    phases = ["installPhase"];
-    installPhase = ''
-      mkdir -p $out/share/dbus-1/services
-      cat <<EOF > $out/share/dbus-1/services/sm.puri.OSK0.service
-      [D-BUS Service]
-      Name=sm.puri.OSK0
-      Exec=${self.squeekboard}/bin/squeekboard
-      EOF
-    '';
-  };
-
-  squeekboard = self.callPackage ./pkgs/squeekboard {};
-
-  megi-call-audio = self.callPackage ./pkgs/megi-call-audio {};
+  # https://github.com/NixOS/nixpkgs/issues/153304
+  alacritty = super.alacritty.overrideAttrs (
+    o: rec {
+      doCheck = false;
+    }
+  );
 
   firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
 
   # this is, with hindsight, not a great name
   launcher = self.callPackage ./pkgs/launcher {};
 
-  saturn = self.callPackage ./pkgs/saturn {};
+  megi-call-audio = self.callPackage ./pkgs/megi-call-audio {};
+
+  netsurf = self.callPackage ./pkgs/netsurf {};
 
   pinephone-toolkit = self.stdenv.mkDerivation {
     name = "pinephone-toolkit";
@@ -36,6 +28,30 @@ self: super: {
       rev = "0deaf8473a81670298e2bc5772c99d4bae68ffd5";
       hash = "sha256-u6C79xLeA/m9/3LroA2DF6qQ7COun0m4pBylLIFnMcI=";
     };
+  };
+
+  saturn = self.callPackage ./pkgs/saturn {};
+
+  schlock = self.callPackage (self.fetchFromGitHub {
+    owner = "telent";
+    repo = "schlock";
+    rev = "65b34b7160c188fa8fc2d8d756d3f022cb5700ed";
+    hash = "sha256-bHBrtn2HoKW5f8dEzrKNBPdXWds8UgXTEgRXbIUwPZw=";
+  }) {};
+
+  squeekboard = self.callPackage ./pkgs/squeekboard {};
+
+  squeekboardService = self.stdenv.mkDerivation {
+    name = "squeekboard.service";
+    phases = ["installPhase"];
+    installPhase = ''
+      mkdir -p $out/share/dbus-1/services
+      cat <<EOF > $out/share/dbus-1/services/sm.puri.OSK0.service
+      [D-BUS Service]
+      Name=sm.puri.OSK0
+      Exec=${self.squeekboard}/bin/squeekboard
+      EOF
+    '';
   };
 
   # CHECK do we need this? the .session file is installed elsewhere

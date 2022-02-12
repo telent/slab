@@ -12,6 +12,12 @@ in {
       type = lib.types.str;
       default = "dan";
     };
+    lockPinFile = lib.mkOption {
+      type = lib.types.str;
+    };
+    lockPicture = lib.mkOption {
+      type = lib.types.str;
+    };
   };
   config = {
     nixpkgs.overlays = [ (import ./overlay.nix) ] ;
@@ -21,21 +27,33 @@ in {
       squeekboardService
       firefoxMobile
       launcher
+      # alacritty
       gnome3.adwaita-icon-theme
+      git vim
     ];
 
-    services.dbus.packages = [ pkgs.squeekboardService ];
+    services.dbus.packages = [ pkgs.squeekboardService pkgs.saturn ];
     services.logind.extraConfig = ''
       HandlePowerKey=suspend
       IdleAction=suspend
-      IdleActionSec=2min
+      IdleActionSec=1min
     '';
 
     programs.sway = {
       enable = true;
       extraPackages = with pkgs; [
-        swaylock swayidle xwayland termite
-        mako grim slurp wl-clipboard wf-recorder
+        grim
+        mako
+        megapixels
+        numberstation
+        netsurf-browser
+        slurp
+        swayidle
+        schlock
+        termite
+        wf-recorder
+        wl-clipboard
+        xwayland
       ];
     };
 
@@ -99,11 +117,13 @@ in {
         let run-sway = pkgs.writeScript "run-sway" ''
           #!${pkgs.bash}/bin/bash
           source ${config.system.build.setEnvironment}
+          SCHLOCK_PIN_FILE=${cfg.lockPinFile}
+          SCHLOCK_PICTURE=${cfg.lockPicture}
+          export SCHLOCK_PICTURE SCHLOCK_PIN_FILE
           ${pkgs.dbus}/bin/dbus-run-session ${pkgs.launcher}/bin/launch
           systemd-cat echo "dbus-run-session $?"
         '';
         in {
-#          ExecStartPre = "${config.system.path}/bin/chvt 6";
           ExecStart = run-sway;
           TTYPath = "/dev/tty${cfg.ttyNumber}";
           TTYReset = "yes";

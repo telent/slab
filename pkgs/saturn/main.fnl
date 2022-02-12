@@ -3,6 +3,8 @@
 (local dbus (require :dbus_proxy))
 (local inspect (require :inspect))
 
+(local ICON_SIZE 64)
+
 (local dbus-service-attrs
        {
         :bus dbus.Bus.SESSION
@@ -72,7 +74,11 @@
 (local inspect (require :inspect))
 (local posix (require :posix))
 
+(local path {
+             :absolute? (fn [str] (= (str:sub 1 1) "/"))
+             })
 (local Gtk lgi.Gtk)
+(local GdkPixbuf lgi.GdkPixbuf)
 (local Pango lgi.Pango)
 
 (local icon-theme (Gtk.IconTheme.get_default))
@@ -85,15 +91,21 @@
                            }))
 (fn find-icon [name]
   (var found false)
-  (if (= (name.sub 1 1) "/")
-      (Gtk.Image.new_from_file name)
-      (let [sizes (icon-theme:get_icon_sizes name)]
-
-        (each [_ res (pairs [64 48]) :until found]
-          (set found (icon-theme:load_icon
-                      name res
-                      (+ Gtk.IconLookupFlags.FORCE_SVG Gtk.IconLookupFlags.USE_BUILTIN))))
-        (Gtk.Image.new_from_pixbuf found))))
+  (if (path.absolute? name)
+    ;; From a direct path
+    (set found (GdkPixbuf.Pixbuf.new_from_file_at_size name ICON_SIZE ICON_SIZE))
+    ;; From icon theme
+    (let [sizes (icon-theme:get_icon_sizes name)]
+      ;; Uses a list of "safe fallback" values
+      ;; Try the desired size first
+      (each [_ res (pairs [ICON_SIZE 128 64 48]) :until found]
+        (set found
+             (-?> (icon-theme:load_icon
+                   name res
+                   (+ Gtk.IconLookupFlags.FORCE_SVG Gtk.IconLookupFlags.USE_BUILTIN))
+                 (: :scale_simple ICON_SIZE ICON_SIZE GdkPixbuf.InterpType.BILINEAR))))
+      ))
+  (Gtk.Image.new_from_pixbuf found))
 
 (fn read-desktop-file [f]
   (let [parsed (inifile.parse f)
