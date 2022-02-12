@@ -198,49 +198,51 @@
       (tset out (. list i) (. list (+ 1 i))))
     out))
 
-(fn make-notification [params]
+(fn make-notification [sender id icon summary body actions hints timeout]
   {
-   :sender (. params 1)
-   :id (. params 2)
-   :app-icon (. params 3)
-   :summary (. params 4)
-   :body (. params 5)
-   :actions (parse-actions (. params 6))
-   :hints (. params 7)
-   :timeout (. params 8)
+   :sender sender
+   :id id
+   :app-icon icon
+   :summary summary
+   :body body
+   :actions (parse-actions actions)
+   :hints hints
+   :timeout timeout
    })
 
+(local interface-info
+       (let [xml (: (io.open "interface.xml" "r") :read "*a")
+             node-info (Gio.DBusNodeInfo.new_for_xml xml)]
+         (. node-info.interfaces 1)))
+
+(local dbus-methods
+       {
+        "GetCapabilities" #["actions" "body" "persistence"]
+        "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
+        "Notify" #(add-notification (make-notification $...))
+        })
+
+(fn args-signature [args]
+  (var sig "")
+  (each [_ v (ipairs args)]
+    (set sig (.. sig v.signature)))
+  sig)
+
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
+  (print interface)
   (when (and (= path dbus-service-attrs.path)
              (= interface dbus-service-attrs.interface))
-    (match method
-      "GetCapabilities"
-      (invocation:return_value (GV "as" ["actions" "body" "persistence"]))
-
-      "GetServerInformation"
-      (invocation:return_value
-       (GV "(ssss)" ["crier"
-                     "telent"
-                     "0.1"
-                     "1.2"]))
-
-      "Notify"
-      (let [p (dbus.variant.strip params)
-            n (make-notification p)]
-        (invocation:return_value (GV "(u)"
-                                     [(add-notification n)])))
-      )))
+    (let [p (dbus.variant.strip params)
+          info (interface-info:lookup_method method)
+          ret (table.pack ((. dbus-methods method) (table.unpack p)))
+          sig (args-signature info.out_args)]
+      (invocation:return_value (GV (.. "(" sig ")") ret)))))
 
 (fn handle-dbus-get [conn sender path interface name]
   (when (and (= path dbus-service-attrs.path)
              (= interface dbus-service-attrs.interface)
              (= name "Visible"))
     (lgi.GLib.Variant "b" true)))
-
-(local interface-info
-       (let [xml (: (io.open "interface.xml" "r") :read "*a")
-             node-info (Gio.DBusNodeInfo.new_for_xml xml)]
-         (. node-info.interfaces 1)))
 
 (Gio.DBusConnection.register_object
  bus.connection
