@@ -88,8 +88,8 @@
 
 (fn update-window []
   (each [id widget (pairs notifications)]
-    (if (not (widget:get_parent))
-        (window.box:pack_start widget false false 5)))
+    (if (not (widget.widget:get_parent))
+        (window.box:pack_start widget.widget false false 5)))
   (if (next notifications)
       (window.window:show_all)
       (window.window:hide)))
@@ -102,7 +102,7 @@
 (fn delete-notification [id]
   (let [widget (. notifications id)]
     (tset notifications id nil)
-    (window.box:remove widget)
+    (window.box:remove widget.widget)
     (update-window)
     false
     ))
@@ -162,7 +162,7 @@
        lgi.GLib.PRIORITY_DEFAULT timeout  #(delete-notification id)))
 
     (update-notification-widget widget noti)
-    (tset notifications id widget.widget)
+    (tset notifications id widget)
     (update-window)
     id))
 
