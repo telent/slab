@@ -111,15 +111,16 @@
   (doto widget
     (: :set-summary noti.summary)
     (: :set-body noti.body)
-    (: :set-icon noti.app-icon)))
+    (: :set-icon noti.app-icon)
+    (: :set-buttons noti.actions)))
 
-(fn default-action [id]
+(fn emit-action [id action]
   (bus.connection:emit_signal
    nil ; destination
    dbus-service-attrs.path
    dbus-service-attrs.interface
    "ActionInvoked"
-   (GV "(us)" [id "default"])))
+   (GV "(us)" [id action])))
 
 (fn make-notification-widget [id]
   (let [summary (Gtk.Label { :name "summary" })
@@ -127,23 +128,40 @@
         icon  (Gtk.Image)
         cancel-me (fn [] (delete-notification id))
         event-box (Gtk.EventBox {
-                                 :on_button_press_event #(default-action id)
+                                 :on_button_press_event #(emit-action id "default")
                                  })
-        hbox (Gtk.Box {
+        messages (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})
+        icon-and-messages (Gtk.Box {
                        :name "notification"
                        :orientation Gtk.Orientation.HORIZONTAL
-                       })
-        vbox (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})]
-    (vbox:pack_start summary false false 0)
-    (vbox:pack_start body true false 0)
-    (hbox:pack_start icon false false 0)
-    (hbox:pack_start vbox true true 0)
-    (event-box:add hbox)
+                                    })
+        buttons (Gtk.Box { :orientation Gtk.Orientation.HORIZONTAL})
+        with-buttons (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})
+        ]
+    (messages:pack_start summary false false 0)
+    (messages:pack_start body true false 0)
+    (icon-and-messages:pack_start icon false false 0)
+    (icon-and-messages:pack_start messages true true 0)
+    (with-buttons:pack_start icon-and-messages false false 0)
+    (with-buttons:pack_start buttons false false 0)
+    (event-box:add with-buttons)
     {
      :set-summary (fn [self value]
                     (set summary.label value))
      :set-body (fn [self value]
                  (set body.label value))
+     :set-buttons (fn [self actions]
+                    (each [_ child (ipairs (buttons:get_children))]
+                      (print child)
+                      (child:destroy))
+                    (when actions
+                      (each [key label (pairs actions)]
+                        (if (not (= key "default"))
+                            (buttons:pack_start (Gtk.Button {
+                                                             :on_clicked
+                                                             #(emit-action id key)
+                                                             :label label })
+                                                true false 0)))))
      :set-icon (fn [self value]
                  (when value
                    (icon:set_from_icon_name
