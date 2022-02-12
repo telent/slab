@@ -39,21 +39,23 @@ compositor (doesn't consume them when it recognises a gesture)
 
 * don't let sway suspend the device without warning when ssh sessions active
    sudo -b systemd-inhibit --mode=block --why="SSH session" sleep 300
+   
+* log journal to persistent storage, or make pstore work
 
 * improve networkmanager ui to work with touch input (nmtui not quite it)
 
 * mobile network
 
 * sort out sleep
- - out what we want it to do
-    - periodic wake from sleep to check for network activity (emails or
-      chat client messages or whatever)
-    - sleep on power button
-    - sleep on idle 2 minutes
-    - don't sleep if ssh session non-idle
- - find out why it's not doing it
+  - periodic wake from sleep to check for network activity (emails or
+      chat client messages or whatever) - use timerfd_create
+  - lock screen before blanking     
+  - blank screen on seat idle 30 seconds
+  - turn screen on/off when power button pressed
+  - sleep on system idle 2 minutes
+  - don't sleep if ssh session non-idle
 
-   timerfd_create(CLOCK_BOOTTIME_ALARM) apparently does this: write a
+   timerfd_create(CLOCK_BOOTTIME_ALARM) wakes from sleep, allegedly: write a
    program that calls it in a loop then prods networkmanager to
    establish a connection. Anything running that wants to poll a
    server when the network is up can register with networkmanager (I
@@ -64,12 +66,10 @@ compositor (doesn't consume them when it recognises a gesture)
 * find apps
   - waydroid?
 
-* notifications for incoming voice calls and messages.
+* notifications for incoming voice calls and messages (WIP - see pkgs/crier)
 
 * (hardware/pinephone) find out why it doesn't charge on usb2
 
 * brightness setting
 
-* firefox
-  - automate layers.acceleration.force setting
-  - find something faster? luakit? netsurf?
+* web browser: get https://github.com/telent/just into a usable state
