@@ -104,6 +104,7 @@
     (tset notifications id nil)
     (window.box:remove widget)
     (update-window)
+    false
     ))
 
 (fn update-notification-widget [widget noti]
@@ -144,9 +145,22 @@
      :widget event-box
      }))
 
+(fn timeout-ms [noti]
+  (if (or (not noti.timeout) (= noti.timeout -1))
+      5000
+      (> noti.timeout 0)
+      noti.timeout
+      (= noti.timeout 0)
+      nil))
+
 (fn add-notification [noti]
   (let [id (if (= noti.id 0) (next-notification-id) noti.id)
-        widget (or (. notifications id) (make-notification-widget id))]
+        widget (or (. notifications id) (make-notification-widget id))
+        timeout (timeout-ms noti)]
+    (when timeout
+      (lgi.GLib.timeout_add
+       lgi.GLib.PRIORITY_DEFAULT timeout  #(delete-notification id)))
+
     (update-notification-widget widget noti)
     (tset notifications id widget.widget)
     (update-window)
@@ -159,6 +173,9 @@
    :app-icon (. params 3)
    :summary (. params 4)
    :body (. params 5)
+   :actions (. params 6)
+   :hints (. params 7)
+   :timeout (. params 8)
    })
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]

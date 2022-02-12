@@ -8,7 +8,6 @@ server optimised for mobile form devices.
 
 - test with "replace"
 - implement actions
-- implement timeouts
 - implement default timeout for urgency in (low, normal)
 - test multi-paragraph body and markup
 - implement GetCapabilities properly
