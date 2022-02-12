@@ -113,13 +113,21 @@
     (: :set-body noti.body)
     (: :set-icon noti.app-icon)))
 
+(fn default-action [id]
+  (bus.connection:emit_signal
+   nil ; destination
+   dbus-service-attrs.path
+   dbus-service-attrs.interface
+   "ActionInvoked"
+   (GV "(us)" [id "default"])))
+
 (fn make-notification-widget [id]
   (let [summary (Gtk.Label { :name "summary" })
         body (Gtk.Label)
         icon  (Gtk.Image)
         cancel-me (fn [] (delete-notification id))
         event-box (Gtk.EventBox {
-                                 :on_button_press_event cancel-me
+                                 :on_button_press_event #(default-action id)
                                  })
         hbox (Gtk.Box {
                        :name "notification"
@@ -166,6 +174,12 @@
     (update-window)
     id))
 
+(fn parse-actions [list]
+  (let [out {}]
+    (for [i 1 (# list) 2]
+      (tset out (. list i) (. list (+ 1 i))))
+    out))
+
 (fn make-notification [params]
   {
    :sender (. params 1)
@@ -173,7 +187,7 @@
    :app-icon (. params 3)
    :summary (. params 4)
    :body (. params 5)
-   :actions (. params 6)
+   :actions (parse-actions (. params 6))
    :hints (. params 7)
    :timeout (. params 8)
    })
@@ -183,7 +197,7 @@
              (= interface dbus-service-attrs.interface))
     (match method
       "GetCapabilities"
-      (invocation:return_value (GV "as" ["actions"]))
+      (invocation:return_value (GV "as" ["actions" "body" "persistence"]))
 
       "GetServerInformation"
       (invocation:return_value
@@ -217,5 +231,14 @@
  (lgi.GObject.Closure handle-dbus-method-call)
  (lgi.GObject.Closure handle-dbus-get)
  (lgi.GObject.Closure (fn [a] (print "set"))))
+
+
+(add-notification {
+                   :app-icon "dialog-information"
+                   :body "This is an example notifiddcation."
+                   :id 3
+                   :sender "notify-send"
+                   :summary "Hello world!"
+                   })
 
 (Gtk:main)
