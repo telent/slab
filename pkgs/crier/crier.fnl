@@ -101,11 +101,14 @@
 
 (fn delete-notification [id]
   (let [widget (. notifications id)]
-    (tset notifications id nil)
-    (window.box:remove widget.widget)
-    (update-window)
-    false
-    ))
+    (if widget
+        (do
+          (tset notifications id nil)
+          (window.box:remove widget.widget)
+          (update-window)
+          true)
+        (values nil "no notification with that id"))))
+
 
 (fn update-notification-widget [widget noti]
   (doto widget
@@ -126,7 +129,6 @@
   (let [summary (Gtk.Label { :name "summary" })
         body (Gtk.Label)
         icon  (Gtk.Image)
-        cancel-me (fn [] (delete-notification id))
         event-box (Gtk.EventBox {
                                  :on_button_press_event #(emit-action id "default")
                                  })
@@ -185,7 +187,7 @@
         timeout (timeout-ms noti)]
     (when timeout
       (lgi.GLib.timeout_add
-       lgi.GLib.PRIORITY_DEFAULT timeout  #(delete-notification id)))
+       lgi.GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id) nil)))
 
     (update-notification-widget widget noti)
     (tset notifications id widget)
@@ -220,6 +222,9 @@
         "GetCapabilities" #["actions" "body" "persistence"]
         "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
         "Notify" #(add-notification (make-notification $...))
+        "CloseNotification" (fn [id]
+                              (let [(won err) (delete-notification id)]
+                                (if won (values) (error err))))
         })
 
 (fn args-signature [args]
@@ -229,14 +234,18 @@
   sig)
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
-  (print interface)
   (when (and (= path dbus-service-attrs.path)
              (= interface dbus-service-attrs.interface))
     (let [p (dbus.variant.strip params)
           info (interface-info:lookup_method method)
-          ret (table.pack ((. dbus-methods method) (table.unpack p)))
           sig (args-signature info.out_args)]
-      (invocation:return_value (GV (.. "(" sig ")") ret)))))
+      (match (table.pack (pcall (. dbus-methods method) (table.unpack p)))
+        [true & vals]
+        (invocation:return_value (GV (.. "(" sig ")") vals))
+        _
+        (invocation:return_value nil)))))
+
+
 
 (fn handle-dbus-get [conn sender path interface name]
   (when (and (= path dbus-service-attrs.path)
