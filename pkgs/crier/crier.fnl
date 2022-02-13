@@ -139,9 +139,9 @@
 
 (fn action-button [id key label]
   (let [b (Gtk.Button {
-                       :on_clicked
-                       #(emit-action id key)
-                       :label label })]
+                       :on_clicked #(emit-action id key)
+                       :label label
+                       })]
     (b.style_context:add_class "action_button")
     (set b.relief Gtk.ReliefStyle.NONE)
     b))
@@ -193,13 +193,16 @@
      :widget event-box
      }))
 
-(fn timeout-ms [params]
-  (if (or (not params.timeout) (= params.timeout -1))
-      (if (= params.hints.urgency 2) nil 5000)
-      (> params.timeout 0)
-      params.timeout
-      (= params.timeout 0)
-      nil))
+(fn timeout-ms [{: timeout : hints}]
+  (if (or (not timeout) (= timeout -1))  (if (= hints.urgency 2) nil 5000)
+      (> timeout 0) timeout
+      (= timeout 0) nil))
+
+(assert (= (timeout-ms { :timeout 23 }) 23))
+(assert (= (timeout-ms { :hints {} }) 5000))
+(assert (= (timeout-ms { :hints {} :timeout -1 }) 5000))
+(assert (= (timeout-ms { :timeout 0 }) nil))
+
 
 (fn add-notification [params]
   (let [id (if (= params.id 0) (next-notification-id) params.id)
