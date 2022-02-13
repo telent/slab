@@ -230,6 +230,7 @@
                          :valign Gtk.Align.START
                          :column_spacing 2
                          :row_spacing 5
+                         :homogeneous true
                          })
       scrolled-window (Gtk.ScrolledWindow {})]
   (each [_ app (pairs (all-apps))]
