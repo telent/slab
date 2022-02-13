@@ -4,7 +4,6 @@
 , iio-sensor-proxy
 , lib
 , lisgd
-, mako
 , pinephone-toolkit
 , saturn
 , squeekboard
@@ -18,8 +17,6 @@ let
     bemenu
     dialog
     lisgd
-    lisgd
-    mako
     pinephone-toolkit
     saturn
     squeekboard

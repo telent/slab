@@ -1,10 +1,5 @@
 self: super: {
-  # https://github.com/NixOS/nixpkgs/issues/153304
-  alacritty = super.alacritty.overrideAttrs (
-    o: rec {
-      doCheck = false;
-    }
-  );
+  crier = self.callPackage ./pkgs/crier {};
 
   fennel = self.fetchurl {
     name = "fennel.lua";
@@ -16,10 +11,6 @@ self: super: {
 
   # this is, with hindsight, not a great name
   launcher = self.callPackage ./pkgs/launcher {};
-
-  megi-call-audio = self.callPackage ./pkgs/megi-call-audio {};
-
-  netsurf = self.callPackage ./pkgs/netsurf {};
 
   luaDbusProxy = self.callPackage ./pkgs/lua-dbus-proxy {
     inherit (self.lua53Packages) lgi buildLuaPackage;

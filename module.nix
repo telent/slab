@@ -45,10 +45,8 @@ in {
       extraPackages = with pkgs; [
         foot
         grim
-        mako
         megapixels
         numberstation
-        netsurf-browser
         slurp
         swayidle
         schlock
