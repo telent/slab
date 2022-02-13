@@ -272,10 +272,7 @@
         (invocation:return_value nil)))))
 
 (fn handle-dbus-get [conn sender path interface name]
-  (when (and (= path dbus-service-attrs.path)
-             (= interface dbus-service-attrs.interface)
-             (= name "Visible"))
-    (lgi.GLib.Variant "b" true)))
+  (error "unexpected property get"))
 
 (Gio.DBusConnection.register_object
  bus.connection
