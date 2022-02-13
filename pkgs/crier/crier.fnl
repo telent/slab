@@ -1,11 +1,7 @@
-(local lgi (require :lgi))
+(local {: Gio : GLib : Gtk : GtkLayerShell &as lgi } (require :lgi))
 (local dbus (require :dbus_proxy))
-(local Gio lgi.Gio)
-(local GLib lgi.GLib)
 (local GV lgi.GLib.Variant)
-(local GtkLayerShell lgi.GtkLayerShell)
 (local variant dbus.variant)
-(local Gtk lgi.Gtk)
 
 (local inspect (require :inspect))
 
@@ -21,8 +17,6 @@
          :interface "org.freedesktop.Notifications"
          :path "/org/freedesktop/Notifications"
          }))
-
-
 
 (let [css (: (io.open "styles.css") :read "*a")
       style_provider (Gtk.CssProvider)]
@@ -176,8 +170,8 @@
         widget (or (. notifications id) (make-notification-widget id))
         timeout (timeout-ms params)]
     (when timeout
-      (lgi.GLib.timeout_add
-       lgi.GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id 1) nil)))
+      (GLib.timeout_add
+       GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id 1) nil)))
 
     (update-notification-widget widget params)
     (tset notifications id widget)
