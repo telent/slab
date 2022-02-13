@@ -91,8 +91,6 @@
       (GtkLayerShell.set_anchor window GtkLayerShell.Edge.RIGHT 1))
     (window:hide)
     {
-     :window window
-     :box box
      :update (fn [self] (update-window window box))
      :remove-child (fn [self child]
                      (box:remove child)
