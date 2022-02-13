@@ -11,5 +11,6 @@ $(PROGRAM_NAME): $(SOURCES) Makefile
 	chmod +x $@
 
 install:
-	mkdir -p $(PREFIX)/bin
+	mkdir -p $(PREFIX)/bin $(PREFIX)/lib/crier
 	cp $(PROGRAM_NAME) $(PREFIX)/bin
+	cp interface.xml styles.css $(PREFIX)/lib/crier

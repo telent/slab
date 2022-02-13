@@ -34,8 +34,13 @@ in stdenv.mkDerivation {
     gtk3
     lua
   ];
+
   nativeBuildInputs = [ lua makeWrapper ];
 
   makeFlags = [ "PREFIX=${placeholder "out"}" ];
+  postInstall = ''
+
+    wrapProgram $out/bin/crier --set CRIER_PATH $out --set GI_TYPELIB_PATH "$GI_TYPELIB_PATH"
+  '';
 
 }

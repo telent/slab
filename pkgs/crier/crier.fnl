@@ -9,6 +9,12 @@
 
 (local in-dev? (os.getenv "CRIER_DEVELOPMENT"))
 
+(fn libdir [filename]
+  (if in-dev?
+      (.. "./" filename)
+      (.. (os.getenv "CRIER_PATH") "/lib/crier/" filename)))
+
+
 (local notifications-service
        (dbus-service.new
         {
@@ -18,7 +24,7 @@
          :path "/org/freedesktop/Notifications"
          }))
 
-(let [css (: (io.open "styles.css") :read "*a")
+(let [css (: (io.open (libdir "styles.css")) :read "*a")
       style_provider (Gtk.CssProvider)]
   (style_provider:load_from_data css)
   (Gtk.StyleContext.add_provider_for_screen
@@ -196,7 +202,7 @@
    })
 
 (notifications-service:register-object
- (: (io.open "interface.xml" "r") :read "*a")
+ (: (io.open (libdir "interface.xml") "r") :read "*a")
  {
   "GetCapabilities" #["actions" "body" "persistence"]
   "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
