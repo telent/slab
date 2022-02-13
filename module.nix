@@ -24,12 +24,13 @@ in {
 
     environment.systemPackages = with pkgs; [
       chatty
-      squeekboardService
+      crier
       firefoxMobile
-      launcher
-      # alacritty
+      git
       gnome3.adwaita-icon-theme
-      git vim
+      launcher
+      squeekboardService
+      vim
     ];
 
     services.dbus.packages = [ pkgs.squeekboardService pkgs.saturn ];
@@ -42,6 +43,7 @@ in {
     programs.sway = {
       enable = true;
       extraPackages = with pkgs; [
+        foot
         grim
         mako
         megapixels
@@ -50,7 +52,6 @@ in {
         slurp
         swayidle
         schlock
-        termite
         wf-recorder
         wl-clipboard
         xwayland
