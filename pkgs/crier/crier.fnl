@@ -62,6 +62,16 @@
 ;; and remove it from the container
 ;; if there are no messages left, hide the windox
 
+(local notifications {})
+
+(fn update-window [window box]
+  (each [id widget (pairs notifications)]
+    (if (not (widget.widget:get_parent))
+        (box:pack_start widget.widget false false 5)))
+  (if (next notifications)
+      (window:show_all)
+      (window:hide)))
+
 (fn make-window []
   (let [window (Gtk.Window {:on_destroy Gtk.main_quit})
         box (Gtk.Box {
@@ -80,19 +90,17 @@
       (GtkLayerShell.set_anchor window GtkLayerShell.Edge.LEFT 1)
       (GtkLayerShell.set_anchor window GtkLayerShell.Edge.RIGHT 1))
     (window:hide)
-    {:window window :box box}))
+    {
+     :window window
+     :box box
+     :update (fn [self] (update-window window box))
+     :remove-child (fn [self child]
+                     (box:remove child)
+                     (update-window window box))
+     }))
 
 (local window (make-window))
 
-(local notifications {})
-
-(fn update-window []
-  (each [id widget (pairs notifications)]
-    (if (not (widget.widget:get_parent))
-        (window.box:pack_start widget.widget false false 5)))
-  (if (next notifications)
-      (window.window:show_all)
-      (window.window:hide)))
 
 (var notification-id 10)
 (fn next-notification-id []
@@ -104,11 +112,9 @@
     (if widget
         (do
           (tset notifications id nil)
-          (window.box:remove widget.widget)
-          (update-window)
+          (window:remove-child widget.widget)
           true)
         (values nil "no notification with that id"))))
-
 
 (fn update-notification-widget [widget noti]
   (doto widget
@@ -191,7 +197,7 @@
 
     (update-notification-widget widget noti)
     (tset notifications id widget)
-    (update-window)
+    (window:update)
     id))
 
 (fn parse-actions [list]
