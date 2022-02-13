@@ -13,18 +13,16 @@
 
 (local in-dev? (os.getenv "CRIER_DEVELOPMENT"))
 
-(local dbus-service-attrs
-       {
-        :bus dbus.Bus.SESSION
-        :name "org.freedesktop.Notifications"
-        :interface "org.freedesktop.Notifications"
-        :path "/org/freedesktop/Notifications"
-        })
+(local notifications-service
+       (dbus-service.new
+        {
+         :bus dbus.Bus.SESSION
+         :name "org.freedesktop.Notifications"
+         :interface "org.freedesktop.Notifications"
+         :path "/org/freedesktop/Notifications"
+         }))
 
-(local bus
-       (match (dbus-service.request-name dbus-service-attrs.name)
-         (false msg) (error msg)
-         b b))
+
 
 (let [css (: (io.open "styles.css") :read "*a")
       style_provider (Gtk.CssProvider)]
@@ -83,12 +81,7 @@
   notification-id)
 
 (fn emit-closed [id reason]
-  (bus.connection:emit_signal
-   nil ; destination
-   dbus-service-attrs.path
-   dbus-service-attrs.interface
-   "NotificationClosed"
-   (GV "(uu)" [id reason])))
+  (notifications-service:emit-signal "NotificationClosed" "(uu)" [id reason]))
 
 (fn delete-notification [id reason-code]
   (let [widget (. notifications id)]
@@ -108,12 +101,7 @@
     (: :set-buttons params.actions)))
 
 (fn emit-action [id action]
-  (bus.connection:emit_signal
-   nil ; destination
-   dbus-service-attrs.path
-   dbus-service-attrs.interface
-   "ActionInvoked"
-   (GV "(us)" [id action])))
+  (notifications-service:emit-signal "ActionInvoked" "(us)" [id action]))
 
 (fn action-button [id key label]
   (let [b (Gtk.Button {
@@ -214,49 +202,16 @@
    :timeout timeout
    })
 
-(local interface-info
-       (let [xml (: (io.open "interface.xml" "r") :read "*a")
-             node-info (Gio.DBusNodeInfo.new_for_xml xml)]
-         (. node-info.interfaces 1)))
-
-(local dbus-methods
-       {
-        "GetCapabilities" #["actions" "body" "persistence"]
-        "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
-        "Notify" #(add-notification (params-from-args $...))
-        "CloseNotification" (fn [id]
-                              (let [(won err) (delete-notification id 3)]
-                                (if won (values) (error err))))
-        })
-
-(fn args-signature [args]
-  (var sig "")
-  (each [_ v (ipairs args)]
-    (set sig (.. sig v.signature)))
-  sig)
-
-(fn handle-dbus-method-call [conn sender path interface method params invocation]
-  (when (and (= path dbus-service-attrs.path)
-             (= interface dbus-service-attrs.interface))
-    (let [p (dbus.variant.strip params)
-          info (interface-info:lookup_method method)
-          sig (args-signature info.out_args)]
-      (match (table.pack (pcall (. dbus-methods method) (table.unpack p)))
-        [true & vals]
-        (invocation:return_value (GV (.. "(" sig ")") vals))
-        _
-        (invocation:return_value nil)))))
-
-(fn handle-dbus-get [conn sender path interface name]
-  (error "unexpected property get"))
-
-(Gio.DBusConnection.register_object
- bus.connection
- dbus-service-attrs.path
- interface-info
- (lgi.GObject.Closure handle-dbus-method-call)
- (lgi.GObject.Closure handle-dbus-get)
- (lgi.GObject.Closure (fn [a] (print "set"))))
+(notifications-service:register-object
+ (: (io.open "interface.xml" "r") :read "*a")
+ {
+  "GetCapabilities" #["actions" "body" "persistence"]
+  "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
+  "Notify" #(add-notification (params-from-args $...))
+  "CloseNotification" (fn [id]
+                        (let [(won err) (delete-notification id 3)]
+                          (if won (values) (error err))))
+  })
 
 (when in-dev?
   (add-notification {
