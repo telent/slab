@@ -5,6 +5,25 @@
 
 (local ICON_SIZE 64)
 
+(local CSS "
+    * {
+      color: rgb(255, 255, 255);
+      text-shadow:
+           0px  1px rgba(0, 0, 0, 255)
+        ,  1px  0px rgba(0, 0, 0, 255)
+        ,  0px -1px rgba(0, 0, 0, 255)
+        , -1px  0px rgba(0, 0, 0, 255)
+        ,  1px  1px rgba(0, 0, 0, 255)
+        ,  1px -1px rgba(0, 0, 0, 255)
+        , -1px  1px rgba(0, 0, 0, 255)
+        , -1px -1px rgba(0, 0, 0, 255)
+      ;
+    }
+    #toplevel {
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+  ")
+
 (local dbus-service-attrs
        {
         :bus dbus.Bus.SESSION
@@ -79,16 +98,36 @@
              })
 (local Gtk lgi.Gtk)
 (local GdkPixbuf lgi.GdkPixbuf)
+(local Gdk lgi.Gdk)
+
 (local Pango lgi.Pango)
 
 (local icon-theme (Gtk.IconTheme.get_default))
 
+;; Use the declared CSS for this app
+(let [style_provider (Gtk.CssProvider)]
+  (style_provider:load_from_data CSS)
+  (Gtk.StyleContext.add_provider_for_screen
+    (Gdk.Screen.get_default)
+    style_provider
+    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    ))
+
+
 (local window (Gtk.Window {
                            :title "Saturn V"
+                           :name "toplevel"
                            :default_width 720
                            :default_height 800
                            :on_destroy Gtk.main_quit
                            }))
+
+;; Using RGBA visual for semi-transparent backgrounds
+;; Requires compositing (e.g. a compositor on X11)
+(let [screen (window:get_screen)
+      visual (screen:get_rgba_visual)]
+  (window:set_visual visual))
+
 (fn find-icon [name]
   (var found false)
   (if (path.absolute? name)
