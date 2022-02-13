@@ -99,7 +99,6 @@
 
 (local window (make-window))
 
-
 (var notification-id 10)
 (fn next-notification-id []
   (set notification-id  (+ notification-id 1))
@@ -114,12 +113,12 @@
           true)
         (values nil "no notification with that id"))))
 
-(fn update-notification-widget [widget noti]
+(fn update-notification-widget [widget params]
   (doto widget
-    (: :set-summary noti.summary)
-    (: :set-body noti.body)
-    (: :set-icon noti.app-icon)
-    (: :set-buttons noti.actions)))
+    (: :set-summary params.summary)
+    (: :set-body params.body)
+    (: :set-icon params.app-icon)
+    (: :set-buttons params.actions)))
 
 (fn emit-action [id action]
   (bus.connection:emit_signal
@@ -177,23 +176,23 @@
      :widget event-box
      }))
 
-(fn timeout-ms [noti]
-  (if (or (not noti.timeout) (= noti.timeout -1))
+(fn timeout-ms [params]
+  (if (or (not params.timeout) (= params.timeout -1))
       5000
-      (> noti.timeout 0)
-      noti.timeout
-      (= noti.timeout 0)
+      (> params.timeout 0)
+      params.timeout
+      (= params.timeout 0)
       nil))
 
-(fn add-notification [noti]
-  (let [id (if (= noti.id 0) (next-notification-id) noti.id)
+(fn add-notification [params]
+  (let [id (if (= params.id 0) (next-notification-id) params.id)
         widget (or (. notifications id) (make-notification-widget id))
-        timeout (timeout-ms noti)]
+        timeout (timeout-ms params)]
     (when timeout
       (lgi.GLib.timeout_add
        lgi.GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id) nil)))
 
-    (update-notification-widget widget noti)
+    (update-notification-widget widget params)
     (tset notifications id widget)
     (window:update)
     id))
@@ -204,7 +203,7 @@
       (tset out (. list i) (. list (+ 1 i))))
     out))
 
-(fn make-notification [sender id icon summary body actions hints timeout]
+(fn params-from-args [sender id icon summary body actions hints timeout]
   {
    :sender sender
    :id id
@@ -225,7 +224,7 @@
        {
         "GetCapabilities" #["actions" "body" "persistence"]
         "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
-        "Notify" #(add-notification (make-notification $...))
+        "Notify" #(add-notification (params-from-args $...))
         "CloseNotification" (fn [id]
                               (let [(won err) (delete-notification id)]
                                 (if won (values) (error err))))
@@ -248,8 +247,6 @@
         (invocation:return_value (GV (.. "(" sig ")") vals))
         _
         (invocation:return_value nil)))))
-
-
 
 (fn handle-dbus-get [conn sender path interface name]
   (when (and (= path dbus-service-attrs.path)
