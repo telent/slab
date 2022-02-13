@@ -146,18 +146,20 @@
                                  })
         messages (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})
         icon-and-messages (Gtk.Box {
-                       :name "notification"
+
                        :orientation Gtk.Orientation.HORIZONTAL
                                     })
         buttons (Gtk.Box { :orientation Gtk.Orientation.HORIZONTAL})
-        with-buttons (Gtk.Box { :orientation Gtk.Orientation.VERTICAL})
+        with-buttons (Gtk.Box {
+                               :name "notification"
+                               :orientation Gtk.Orientation.VERTICAL})
         ]
     (messages:pack_start summary false false 0)
     (messages:pack_start body true false 0)
     (icon-and-messages:pack_start icon false false 0)
     (icon-and-messages:pack_start messages true true 0)
     (with-buttons:pack_start icon-and-messages false false 0)
-    (with-buttons:pack_start buttons false false 0)
+    (with-buttons:pack_start buttons false false 5)
     (event-box:add with-buttons)
     {
      :set-summary (fn [self value]
