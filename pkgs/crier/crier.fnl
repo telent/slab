@@ -104,12 +104,21 @@
   (set notification-id  (+ notification-id 1))
   notification-id)
 
-(fn delete-notification [id]
+(fn emit-closed [id reason]
+  (bus.connection:emit_signal
+   nil ; destination
+   dbus-service-attrs.path
+   dbus-service-attrs.interface
+   "NotificationClosed"
+   (GV "(uu)" [id reason])))
+
+(fn delete-notification [id reason-code]
   (let [widget (. notifications id)]
     (if widget
         (do
           (tset notifications id nil)
           (window:remove-child widget.widget)
+          (emit-closed id reason-code)
           true)
         (values nil "no notification with that id"))))
 
@@ -186,7 +195,7 @@
 
 (fn timeout-ms [params]
   (if (or (not params.timeout) (= params.timeout -1))
-      5000
+      (if (= params.hints.urgency 2) nil 5000)
       (> params.timeout 0)
       params.timeout
       (= params.timeout 0)
@@ -198,7 +207,7 @@
         timeout (timeout-ms params)]
     (when timeout
       (lgi.GLib.timeout_add
-       lgi.GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id) nil)))
+       lgi.GLib.PRIORITY_DEFAULT timeout  #(do (delete-notification id 1) nil)))
 
     (update-notification-widget widget params)
     (tset notifications id widget)
@@ -234,7 +243,7 @@
         "GetServerInformation" #(values "crier" "telent" "0.1" "1.2")
         "Notify" #(add-notification (params-from-args $...))
         "CloseNotification" (fn [id]
-                              (let [(won err) (delete-notification id)]
+                              (let [(won err) (delete-notification id 3)]
                                 (if won (values) (error err))))
         })
 
