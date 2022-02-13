@@ -128,6 +128,15 @@
    "ActionInvoked"
    (GV "(us)" [id action])))
 
+(fn action-button [id key label]
+  (let [b (Gtk.Button {
+                       :on_clicked
+                       #(emit-action id key)
+                       :label label })]
+    (b.style_context:add_class "action_button")
+    (set b.relief Gtk.ReliefStyle.NONE)
+    b))
+
 (fn make-notification-widget [id]
   (let [summary (Gtk.Label { :name "summary" })
         body (Gtk.Label)
@@ -157,16 +166,13 @@
                  (set body.label value))
      :set-buttons (fn [self actions]
                     (each [_ child (ipairs (buttons:get_children))]
-                      (print child)
                       (child:destroy))
                     (when actions
                       (each [key label (pairs actions)]
                         (if (not (= key "default"))
-                            (buttons:pack_start (Gtk.Button {
-                                                             :on_clicked
-                                                             #(emit-action id key)
-                                                             :label label })
-                                                true false 0)))))
+                            (buttons:pack_end
+                             (action-button id key label)
+                             false false 5)))))
      :set-icon (fn [self value]
                  (when value
                    (icon:set_from_icon_name

@@ -8,3 +8,6 @@ box#notification {
 label#summary {
     font-weight: bold;
 }
+button.action_button {
+    font-weight: bold;
+}
