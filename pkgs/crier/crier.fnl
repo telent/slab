@@ -9,6 +9,8 @@
 
 (local inspect (require :inspect))
 
+(local dbus-service (require :dbus-service))
+
 (local in-dev? (os.getenv "CRIER_DEVELOPMENT"))
 
 (local dbus-service-attrs
@@ -19,36 +21,10 @@
         :path "/org/freedesktop/Notifications"
         })
 
-(local bus (dbus.Proxy:new
-            {
-             :bus dbus.Bus.SESSION
-             :name "org.freedesktop.DBus"
-             :interface "org.freedesktop.DBus"
-             :path "/org/freedesktop/DBus"
-             }))
-
-
-(local DBUS_NAME_FLAG_DO_NOT_QUEUE 4)
-(local DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER 1)
-(local DBUS_REQUEST_NAME_REPLY_IN_QUEUE 2)
-(local DBUS_REQUEST_NAME_REPLY_EXISTS 3)
-(local DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER 4)
-
-
-(let [ret (bus:RequestName dbus-service-attrs.name
-                           DBUS_NAME_FLAG_DO_NOT_QUEUE)]
-  (match ret
-    DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER
-    true
-
-    DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER
-    true
-
-    DBUS_REQUEST_NAME_REPLY_IN_QUEUE
-    (error "unexpected DBUS_REQUEST_NAME_REPLY_IN_QUEUE")
-
-    DBUS_REQUEST_NAME_REPLY_EXISTS
-    (error "already running")))
+(local bus
+       (match (dbus-service.request-name dbus-service-attrs.name)
+         (false msg) (error msg)
+         b b))
 
 (let [css (: (io.open "styles.css") :read "*a")
       style_provider (Gtk.CssProvider)]
