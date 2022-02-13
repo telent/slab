@@ -48,17 +48,16 @@
                       :orientation Gtk.Orientation.VERTICAL
                       })]
     (window:add box)
-    (when true
-      (GtkLayerShell.init_for_window window)
-      (GtkLayerShell.set_layer window GtkLayerShell.Layer.TOP)
-      (GtkLayerShell.auto_exclusive_zone_enable window)
+    (GtkLayerShell.init_for_window window)
+    (GtkLayerShell.set_layer window GtkLayerShell.Layer.TOP)
+    (GtkLayerShell.auto_exclusive_zone_enable window)
 
-      (GtkLayerShell.set_margin window GtkLayerShell.Edge.TOP 1)
-      (GtkLayerShell.set_margin window GtkLayerShell.Edge.BOTTOM 10)
+    (GtkLayerShell.set_margin window GtkLayerShell.Edge.TOP 1)
+    (GtkLayerShell.set_margin window GtkLayerShell.Edge.BOTTOM 10)
 
-      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.TOP 1)
-      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.LEFT 1)
-      (GtkLayerShell.set_anchor window GtkLayerShell.Edge.RIGHT 1))
+    (GtkLayerShell.set_anchor window GtkLayerShell.Edge.TOP 1)
+    (GtkLayerShell.set_anchor window GtkLayerShell.Edge.LEFT 1)
+    (GtkLayerShell.set_anchor window GtkLayerShell.Edge.RIGHT 1)
     (window:hide)
     {
      :update (fn [self] (update-window window box))
@@ -208,6 +207,8 @@
   })
 
 (when in-dev?
+  ;; this is just here for convenience when twiddling with the
+  ;; layout/styling
   (add-notification {
                      :app-icon "dialog-information"
                      :body "This is an example notification."
