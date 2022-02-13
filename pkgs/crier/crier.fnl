@@ -9,6 +9,8 @@
 
 (local inspect (require :inspect))
 
+(local in-dev? (os.getenv "CRIER_DEVELOPMENT"))
+
 (local dbus-service-attrs
        {
         :bus dbus.Bus.SESSION
@@ -198,10 +200,11 @@
       (> timeout 0) timeout
       (= timeout 0) nil))
 
-(assert (= (timeout-ms { :timeout 23 }) 23))
-(assert (= (timeout-ms { :hints {} }) 5000))
-(assert (= (timeout-ms { :hints {} :timeout -1 }) 5000))
-(assert (= (timeout-ms { :timeout 0 }) nil))
+(when in-dev?
+  (assert (= (timeout-ms { :timeout 23 }) 23))
+  (assert (= (timeout-ms { :hints {} }) 5000))
+  (assert (= (timeout-ms { :hints {} :timeout -1 }) 5000))
+  (assert (= (timeout-ms { :timeout 0 }) nil)))
 
 
 (fn add-notification [params]
@@ -282,13 +285,19 @@
  (lgi.GObject.Closure handle-dbus-get)
  (lgi.GObject.Closure (fn [a] (print "set"))))
 
-
-(add-notification {
-                   :app-icon "dialog-information"
-                   :body "This is an example notifiddcation."
-                   :id 3
-                   :sender "notify-send"
-                   :summary "Hello world!"
-                   })
+(when in-dev?
+  (add-notification {
+                     :app-icon "dialog-information"
+                     :body "This is an example notification."
+                     :id 3
+                     :sender "notify-send"
+                     :actions {
+                               "default" "foo"
+                               "yes" "Yes please"
+                               "no" "Nein"
+                               }
+                     :timeout 10000
+                     :summary "Hello world!"
+                     }))
 
 (Gtk:main)
