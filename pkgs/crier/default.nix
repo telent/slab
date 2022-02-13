@@ -39,6 +39,13 @@ in stdenv.mkDerivation {
 
   makeFlags = [ "PREFIX=${placeholder "out"}" ];
   postInstall = ''
+    mkdir -p $out/share/dbus-1/services
+
+    cat <<SERVICE > $out/share/dbus-1/services/org.freedesktop.Notifications.service
+    [D-BUS Service]
+    Name=org.freedesktop.Notifications
+    Exec=$out/bin/crier
+    SERVICE
 
     wrapProgram $out/bin/crier --set CRIER_PATH $out --set GI_TYPELIB_PATH "$GI_TYPELIB_PATH"
   '';
