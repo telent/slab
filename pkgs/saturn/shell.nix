@@ -1,4 +1,4 @@
-with import <nixpkgs> {} ;
+with import <nixpkgs> { overlays = [ (import ../../overlay.nix) ];  } ;
 (callPackage ./. {
 }).overrideAttrs(o: {
   GDK_PIXBUF_MODULE_FILE = "${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";

@@ -1,5 +1,6 @@
 { stdenv
 , callPackage
+, fennel
 , fetchFromGitHub
 , fetchurl
 , gobject-introspection
@@ -7,20 +8,12 @@
 , lib
 , librsvg
 , lua53Packages
+, luaDbusProxy
 , lua5_3
 , makeWrapper
 , writeText
 }:
-let fennel = fetchurl {
-      name = "fennel.lua";
-      url = "https://fennel-lang.org/downloads/fennel-1.0.0";
-      hash = "sha256:1nha32yilzagfwrs44hc763jgwxd700kaik1is7x7lsjjvkgapw7";
-    };
-    dbusProxy = callPackage ./dbus-proxy.nix {
-      inherit (lua53Packages) lgi buildLuaPackage;
-      lua = lua5_3;
-    };
-    inifile = let lua = lua5_3; in lua53Packages.buildLuaPackage rec {
+let inifile = let lua = lua5_3; in lua53Packages.buildLuaPackage rec {
       pname  = "inifile";
       name = "${pname}-${version}";
       version  = "1.0.2";
@@ -38,7 +31,7 @@ let fennel = fetchurl {
     };
 
     lua = lua5_3.withPackages (ps: with ps; [
-      dbusProxy
+      luaDbusProxy
       inifile
       inspect
       lgi

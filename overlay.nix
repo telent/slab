@@ -6,6 +6,12 @@ self: super: {
     }
   );
 
+  fennel = self.fetchurl {
+    name = "fennel.lua";
+    url = "https://fennel-lang.org/downloads/fennel-1.0.0";
+    hash = "sha256:1nha32yilzagfwrs44hc763jgwxd700kaik1is7x7lsjjvkgapw7";
+  };
+
   firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
 
   # this is, with hindsight, not a great name
@@ -14,6 +20,11 @@ self: super: {
   megi-call-audio = self.callPackage ./pkgs/megi-call-audio {};
 
   netsurf = self.callPackage ./pkgs/netsurf {};
+
+  luaDbusProxy = self.callPackage ./pkgs/lua-dbus-proxy {
+    inherit (self.lua53Packages) lgi buildLuaPackage;
+    lua = self.lua5_3;
+  };
 
   pinephone-toolkit = self.stdenv.mkDerivation {
     name = "pinephone-toolkit";
