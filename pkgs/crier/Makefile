@@ -7,7 +7,9 @@ SOURCES=$(MAIN) dbus-service.fnl
 
 $(PROGRAM_NAME): $(SOURCES) Makefile
 	(echo -e "#!/usr/bin/env lua\n" ; \
-	 lua $(FENNEL) --require-as-include --compile $(MAIN) ) > $@
+	: we reset package.path so that --require-as-include cannot find ; \
+	: and inline third-party modules ; \
+	lua -e 'package.path="./?.lua"' $(FENNEL) --require-as-include --compile $(MAIN) ) > $@
 	chmod +x $@
 
 install:
