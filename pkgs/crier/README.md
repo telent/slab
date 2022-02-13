@@ -2,7 +2,12 @@
 
 A rudimentary [Desktop
 Notifications](https://specifications.freedesktop.org/notification-spec/latest/ar01s02.html)
-server optimised for mobile form devices.
+server optimised for mobile formfactors and touchscreen.
+
+* Supports: summary, body, app-icon, actions, timeouts
+* Does not support: action icons, images, markup in text, links
+* Notifications are displayed in an overlay layer at the top of the screen
+* Swipe a notification to dismiss it (TODO)
 
 ## TO DO
 
