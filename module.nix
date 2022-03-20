@@ -25,7 +25,6 @@ in {
     environment.systemPackages = with pkgs; [
       chatty
       crier
-      firefoxMobile
       git
       gnome3.adwaita-icon-theme
       launcher
@@ -45,6 +44,7 @@ in {
       extraPackages = with pkgs; [
         foot
         grim
+        just
         megapixels
         numberstation
         slurp

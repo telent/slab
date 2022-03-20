@@ -7,7 +7,7 @@ self: super: {
     hash = "sha256:1nha32yilzagfwrs44hc763jgwxd700kaik1is7x7lsjjvkgapw7";
   };
 
-  firefoxMobile = self.callPackage ./pkgs/mobile-firefox {};
+  just = self.callPackage ../just {};
 
   # this is, with hindsight, not a great name
   launcher = self.callPackage ./pkgs/launcher {};
