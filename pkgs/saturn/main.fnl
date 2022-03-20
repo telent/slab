@@ -1,7 +1,23 @@
-(local lgi (require :lgi))
-(local Gio lgi.Gio)
+(local {: Gio
+        : GLib
+        : GObject
+        : Gtk
+        : GdkPixbuf
+        : Gdk
+        : Pango}
+       (require :lgi))
+
+(local {: List
+        : stringx
+        : tablex
+        }
+       ((require :pl.import_into)))
+
 (local dbus (require :dbus_proxy))
 (local inspect (require :inspect))
+(local lfs (require :lfs))
+(local inifile (require :inifile))
+(local posix (require :posix))
 
 (local ICON_SIZE 64)
 
@@ -88,14 +104,6 @@
       (os.exit 0))))
 
 
-(local lfs (require :lfs))
-(local inifile (require :inifile))
-(local List (require "pl.List"))
-(local stringx (require "pl.stringx"))
-(local tablex (require "pl.tablex"))
-(local inspect (require :inspect))
-(local posix (require :posix))
-
 (local path {
              :absolute? (fn [str] (= (str:sub 1 1) "/"))
              :concat (fn [...] (table.concat [...] "/"))
@@ -104,11 +112,6 @@
                     :concat (fn [...] (table.concat [...] ":"))
                     })
 
-(local Gtk lgi.Gtk)
-(local GdkPixbuf lgi.GdkPixbuf)
-(local Gdk lgi.Gdk)
-
-(local Pango lgi.Pango)
 
 (local icon-theme (Gtk.IconTheme.get_default))
 
@@ -120,7 +123,6 @@
     style_provider
     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     ))
-
 
 (local window (Gtk.Window {
                            :title "Saturn V"
@@ -256,15 +258,15 @@
   (when (and (= path dbus-service-attrs.path)
              (= interface dbus-service-attrs.interface)
              (= name "Visible"))
-    (lgi.GLib.Variant "b" window.visible)))
+    (GLib.Variant "b" window.visible)))
 
 (Gio.DBusConnection.register_object
  bus.connection
  dbus-service-attrs.path
  interface-info
- (lgi.GObject.Closure handle-dbus-method-call)
- (lgi.GObject.Closure handle-dbus-get)
- (lgi.GObject.Closure (fn [a] (print "set"))))
+ (GObject.Closure handle-dbus-method-call)
+ (GObject.Closure handle-dbus-get)
+ (GObject.Closure (fn [a] (print "set"))))
 
 (let [grid (Gtk.FlowBox {
                          :orientation Gtk.Orientation.HORIZONTAL
