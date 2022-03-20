@@ -159,8 +159,8 @@
 (fn read-desktop-file [f]
   (let [parsed (inifile.parse f)
         vals (. parsed "Desktop Entry")]
-    (when vals.Icon
-      (tset vals "IconImage" (find-icon vals.Icon)))
+    (tset vals "IconImage"
+          (find-icon (or vals.Icon "application-x-executable")))
     (tset vals "ID" (f:sub 0 -9))
     vals))
 
@@ -232,11 +232,24 @@
 (fn button-for [app]
   (doto (Gtk.Button
          {
-          :label app.Name
           :image-position Gtk.PositionType.TOP
           :relief Gtk.ReliefStyle.NONE
-          :on_clicked #(launch app)          })
-    (: :set_image app.IconImage)))
+          :on_clicked #(launch app)
+          })
+    (: :add
+       (doto (Gtk.Box {:orientation Gtk.Orientation.VERTICAL})
+         (: :add app.IconImage)
+         (: :add (doto
+                     (Gtk.Label {
+                                 :label app.Name
+                                 :halign Gtk.Align.CENTER
+                                 :justify Gtk.Justification.CENTER
+                                 :wrap true
+                                 })
+                   (: :set_line_wrap true)
+                   (: :set_max_width_chars 10)
+                   (tset :expand false)))
+         ))))
 
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
