@@ -140,7 +140,7 @@ in {
     };
 
     # waybar needs one or more of these for icons
-    fonts.fonts = with pkgs; [ font-awesome font-awesome-ttf ] ;
+    fonts.fonts = with pkgs; [ font-awesome ] ;
 
     networking.wireless.enable = false;
 
