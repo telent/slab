@@ -172,10 +172,8 @@
 
 (fn xdg-data-home []
   "Provides XDG_DATA_HOME or its default fallback value"
-  (local data-home (os.getenv "XDG_DATA_HOME"))
-  (if data-home
-    data-home
-    (path.concat (current-user-home) ".local/share/")))
+  (or (os.getenv "XDG_DATA_HOME")
+      (path.concat (current-user-home) ".local/share/")))
 
 (fn xdg-data-dirs []
   "Provides all data-dirs as a List. Most important first."
