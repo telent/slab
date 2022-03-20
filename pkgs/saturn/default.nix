@@ -37,6 +37,7 @@ let inifile = let lua = lua5_3; in lua53Packages.buildLuaPackage rec {
       lgi
       luafilesystem
       luaposix
+      penlight
       readline
     ]);
 in stdenv.mkDerivation {

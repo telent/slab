@@ -90,12 +90,20 @@
 
 (local lfs (require :lfs))
 (local inifile (require :inifile))
+(local List (require "pl.List"))
+(local stringx (require "pl.stringx"))
+(local tablex (require "pl.tablex"))
 (local inspect (require :inspect))
 (local posix (require :posix))
 
 (local path {
              :absolute? (fn [str] (= (str:sub 1 1) "/"))
+             :concat (fn [...] (table.concat [...] "/"))
              })
+(local search-path {
+                    :concat (fn [...] (table.concat [...] ":"))
+                    })
+
 (local Gtk lgi.Gtk)
 (local GdkPixbuf lgi.GdkPixbuf)
 (local Gdk lgi.Gdk)
@@ -151,19 +159,52 @@
         vals (. parsed "Desktop Entry")]
     (when vals.Icon
       (tset vals "IconImage" (find-icon vals.Icon)))
+    (tset vals "ID" (f:sub 0 -9))
     vals))
 
+(fn current-user-home []
+  "Returns current user's home directory."
+  (-> (posix.unistd.getuid)
+      (posix.pwd.getpwuid)
+      (. :pw_dir)))
+
+(fn xdg-data-home []
+  "Provides XDG_DATA_HOME or its default fallback value"
+  (local data-home (os.getenv "XDG_DATA_HOME"))
+  (if data-home
+    data-home
+    (path.concat (current-user-home) ".local/share/")))
+
+(fn xdg-data-dirs []
+  "Provides all data-dirs as a List. Most important first."
+  ;; Expected to be used with gmatch as a generator.
+  (let [dirs (List)]
+  (dirs:append (xdg-data-home))
+  (dirs:extend (stringx.split (os.getenv "XDG_DATA_DIRS") ":"))
+  dirs
+  ))
+
 (fn all-apps []
+  ;; Each desktop entry representing an application is identified
+  ;; by its desktop file ID, which is based on its filename.
+  ;;  — https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#desktop-file-id
+  "Provides apps in a List, sorted by name"
   (var apps-table {})
-  (each [path (string.gmatch (os.getenv "XDG_DATA_DIRS") "[^:]*")]
-    (let [apps  (..  path "/applications/")]
-      (when (lfs.attributes apps)
-        (each [f (lfs.dir apps)]
+  ;; Reversing the data dirs gives priority to the first elements.
+  ;; This means conflicting `.desktop` files (or: desktop file ID) are given
+  ;; priority to the first elements by "simply" reading it last.
+  (each [path (List.iter (List.reverse (xdg-data-dirs)))]
+    (let [apps-dir (..  path "/applications/")]
+      (when (lfs.attributes apps-dir)
+        (each [f (lfs.dir apps-dir)]
           (when (= (f:sub -8) ".desktop")
-            (let [attrs (read-desktop-file (.. apps  f))]
+            (let [attrs (read-desktop-file (.. apps-dir  f))]
               (when (not attrs.NoDisplay)
-                (tset apps-table attrs.Name attrs))))))))
-  apps-table)
+                (tset apps-table attrs.ID attrs))))))))
+  ;; We have a table indexed by IDs, we don't care about the indexing.
+  ;; Make a List and sort it by name.
+  (List.sort (List (tablex.values apps-table))
+    (fn [a b] (< (string.upper a.Name) (string.upper b.Name)))))
 
 ;; Exec entries in desktop files may contain %u %f and other characters
 ;; in which the launcher is supposed to interpolate filenames/urls etc.
@@ -233,7 +274,7 @@
                          :homogeneous true
                          })
       scrolled-window (Gtk.ScrolledWindow {})]
-  (each [_ app (pairs (all-apps))]
+  (each [app (List.iter (all-apps))]
     (grid:insert (button-for app) -1))
   (scrolled-window:add grid)
   (window:add scrolled-window))
