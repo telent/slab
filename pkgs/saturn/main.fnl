@@ -242,19 +242,19 @@
     (-> (: :get_style_context) (: :add_class "appbutton"))
     (: :add
        (doto (Gtk.Box {:orientation Gtk.Orientation.VERTICAL})
-         (: :add app.IconImage)
-         (: :add (doto
-                     (Gtk.Label {
-                                 :label app.Name
-                                 :halign Gtk.Align.CENTER
-                                 :justify Gtk.Justification.CENTER
-                                 :wrap true
-                                 })
-                   (: :set_line_wrap true)
-                   (: :set_max_width_chars 10)
-                   (tset :expand false)))
+         (: :pack_start app.IconImage false false 0)
+         (: :pack_start
+            (doto
+                (Gtk.Label {
+                            ;; https://stackoverflow.com/questions/27462926/how-to-set-max-width-of-gtklabel-properly
+                            :label app.Name
+                            :justify Gtk.Justification.CENTER
+                            :ellipsize Pango.EllipsizeMode.END
+                            :hexpand true
+                            })
+              (: :set_max_width_chars 1))
+            true true 0)
          ))))
-
 
 (fn handle-dbus-method-call [conn sender path interface method params invocation]
   (when (and (= path dbus-service-attrs.path)
